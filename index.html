@@ -303,7 +303,6 @@
                     const cleanData = {};
                     Object.keys(data).forEach(key => { if(data[key] !== undefined) cleanData[key] = data[key]; });
                     const ref = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys');
-                    
                     if (id) {
                         await ref.doc(id).update(cleanData);
                         showToast("更新しました");
@@ -353,10 +352,13 @@
             const currentResponses = useMemo(() => responses.filter(r => r.surveyId === currentSurvey?.id).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)), [responses, currentSurvey]);
             const favoriteResponses = useMemo(() => responses.filter(r => r.liked), [responses]);
 
-            const navigate = (v, d = null) => {
-                setCurrentSurvey(d);
-                setView(v);
-                window.scrollTo(0,0);
+            // ここを修正！ isPreview 引数を受け取るように変更
+            const navigateTo = (newView, data = null, index = 0, isPreview = false) => {
+                setIsPreviewMode(isPreview);
+                if (data) setCurrentSurvey(data);
+                if (newView === 'share') setSelectedResponseIndex(index);
+                setView(newView);
+                window.scrollTo(0, 0);
             };
 
             if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-indigo-400 animate-pulse">coelog...</div>;
@@ -364,11 +366,11 @@
             return (
                 <div className="max-w-md mx-auto px-5 py-6 relative min-h-screen overflow-hidden">
                     {view === 'login' && <LoginView onLoginGoogle={handleLoginGoogle} />}
-                    {view === 'home' && <HomeView surveys={surveys} user={user} onLogoutRequest={() => setShowLogoutConfirm(true)} onNavigate={navigate} />}
-                    {view === 'favorites' && <FavoritesView responses={favoriteResponses} surveys={surveys} onNavigate={(v, d, i) => { setSelectedResponseIndex(i); navigate(v, d); }} onBack={() => setView('home')} />}
+                    {view === 'home' && <HomeView surveys={surveys} user={user} onLogoutRequest={() => setShowLogoutConfirm(true)} onNavigate={navigateTo} />}
+                    {view === 'favorites' && <FavoritesView responses={favoriteResponses} surveys={surveys} onNavigate={(v, d, i) => navigateTo(v, d, i)} onBack={() => setView('home')} />}
                     {(view === 'create' || view === 'edit') && <SurveyFormView initialData={view === 'edit' ? currentSurvey : null} onSave={handleSaveSurvey} onBack={() => setView(view === 'edit' ? 'stats' : 'home')} />}
                     {view === 'respond' && <RespondView survey={currentSurvey} onSubmit={handleAddResponse} onBack={() => setView('stats')} isPreview={isPreviewMode} />}
-                    {view === 'stats' && <StatsView survey={currentSurvey} responses={currentResponses} onNavigate={(v, d, i) => { setSelectedResponseIndex(i); navigate(v, d); }} onBack={() => setView('home')} onDelete={handleDeleteSurvey} onDeleteResponse={handleDeleteResponse} onToggleLike={toggleLike} onCopy={handleCopyURL} />}
+                    {view === 'stats' && <StatsView survey={currentSurvey} responses={currentResponses} onNavigate={navigateTo} onBack={() => setView('home')} onDelete={handleDeleteSurvey} onDeleteResponse={handleDeleteResponse} onToggleLike={toggleLike} onCopy={handleCopyURL} />}
                     {view === 'share' && <ResponseGallery responses={currentSurvey ? currentResponses : favoriteResponses} initialIndex={selectedResponseIndex} survey={currentSurvey} surveys={surveys} onClose={() => setView(currentSurvey ? 'stats' : 'favorites')} />}
 
                     {notification && (
@@ -533,7 +535,7 @@
                                      onClick={() => onNavigate('share', survey, i)}
                                      {...longPressProps}
                                      onContextMenu={(e) => { e.preventDefault(); setDeleteResId(res.id); }}
-                                     className={`bg-white border-visible p-5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] no-callout select-none ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}>
+                                     className={`bg-white border-visible p-5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] select-none no-callout ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}>
                                     <div className="flex items-start justify-between">
                                         <div className="flex flex-col gap-1.5 w-full pr-2">
                                             <div className="flex items-center gap-2">
