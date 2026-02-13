@@ -31,9 +31,6 @@
         }
         .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-        
-        /* セーフエリア対応 */
-        .pt-safe { padding-top: env(safe-area-inset-top); }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         
         /* 固定サイズの正円ボタン */
@@ -84,9 +81,9 @@
         .rounded-card { border-radius: 1rem !important; }
         
         /* カード内スクロールバーのカスタマイズ */
-        .custom-scrollbar::-webkit-scrollbar { width: 2px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
     </style>
 </head>
 <body class="antialiased">
@@ -338,7 +335,7 @@
                     {view === 'home' && <HomeView surveys={surveys} user={user} onLogoutRequest={() => setShowLogoutConfirm(true)} onNavigate={navigate} />}
                     {view === 'favorites' && <FavoritesView responses={favoriteResponses} surveys={surveys} onNavigate={(v, d, i) => { setSelectedResponseIndex(i); navigate(v, d); }} onBack={() => setView('home')} />}
                     {(view === 'create' || view === 'edit') && <SurveyFormView initialData={view === 'edit' ? currentSurvey : null} onSave={handleSaveSurvey} onBack={() => setView(view === 'edit' ? 'stats' : 'home')} />}
-                    {view === 'respond' && <RespondView survey={currentSurvey} onSubmit={handleAddResponse} onBack={() => setView('stats')} isPreview={isPreviewMode} />}
+                    {view === 'respond' && <RespondView survey={currentSurvey} onSubmit={handleAddResponse} onBack={() => setView('stats')} />}
                     {view === 'stats' && <StatsView survey={currentSurvey} responses={currentResponses} onNavigate={(v, d, i) => { setSelectedResponseIndex(i); navigate(v, d); }} onBack={() => setView('home')} onDelete={handleDeleteSurvey} onToggleLike={toggleLike} onCopy={handleCopyURL} />}
                     {view === 'share' && <ResponseGallery responses={currentSurvey ? currentResponses : favoriteResponses} initialIndex={selectedResponseIndex} survey={currentSurvey} surveys={surveys} onClose={() => setView(currentSurvey ? 'stats' : 'favorites')} />}
 
@@ -405,18 +402,38 @@
 
         function HomeView({ surveys, user, onLogoutRequest, onNavigate }) {
             return (
-                <div className="space-y-6 animate-in fade-in duration-500">
-                    <header className="flex items-center justify-between py-1 px-1">
-                        <h1 className="text-xl font-black tracking-tighter text-slate-900">coelog</h1>
-                        <button onClick={onLogoutRequest} className="icon-btn-circle text-slate-400 bg-white shadow-sm border-visible active:scale-90 transition-all">
-                             <Lucide name="log-out" size={18} />
-                        </button>
+                <div className="space-y-8 animate-in fade-in duration-700">
+                    {/* 背景装飾（オーブ） */}
+                    <div className="absolute -top-20 -left-20 w-64 h-64 bg-indigo-100 rounded-full blur-3xl opacity-50 pointer-events-none" />
+                    <div className="absolute top-40 -right-20 w-64 h-64 bg-purple-100 rounded-full blur-3xl opacity-50 pointer-events-none" />
+
+                    <header className="relative z-10 flex flex-col gap-6 pt-2 px-2">
+                        <div className="flex items-center justify-between">
+                             <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-400 flex items-center justify-center text-white shadow-md">
+                                    <Lucide name="sparkles" size={14} />
+                                </div>
+                                <h1 className="text-xl font-black tracking-tighter text-slate-900">coelog</h1>
+                            </div>
+                            <button onClick={onLogoutRequest} className="icon-btn-circle text-slate-400 bg-white/60 shadow-sm border-visible active:scale-90 transition-all backdrop-blur-md">
+                                 <Lucide name="log-out" size={18} />
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-1">
+                            <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest pl-1">Welcome back</p>
+                            <h2 className="text-2xl font-black text-slate-800 leading-tight">
+                                あなたの言葉で、<br />
+                                誰かの心を動かそう。
+                            </h2>
+                        </div>
                     </header>
-                    <div className="grid gap-4 pb-24">
+
+                    <div className="grid gap-4 pb-24 relative z-10">
                         {surveys.length === 0 ? (
-                            <button onClick={() => onNavigate('create')} className="w-full bg-white border-2 border-dashed border-slate-300 rounded-card py-12 text-center space-y-3"><Lucide name="plus" size={24} className="mx-auto text-indigo-200" /><p className="text-slate-500 text-xs font-bold">アンケートを作成</p></button>
+                            <button onClick={() => onNavigate('create')} className="w-full bg-white/60 backdrop-blur-sm border-2 border-dashed border-slate-300 rounded-card py-12 text-center space-y-3 hover:bg-white/80 transition-all"><Lucide name="plus" size={24} className="mx-auto text-indigo-200" /><p className="text-slate-500 text-xs font-bold">アンケートを作成</p></button>
                         ) : surveys.map(s => (
-                            <button key={s.id} onClick={() => onNavigate('stats', s)} className="bg-white border-visible p-5 rounded-card text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
+                            <button key={s.id} onClick={() => onNavigate('stats', s)} className="bg-white/90 backdrop-blur-sm border-visible p-5 rounded-card text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center text-slate-400 font-black text-[9px]"><div className="p-1.5 bg-indigo-50 text-indigo-500 rounded-xl"><Lucide name="message-circle" size={14} /></div><span className="flex items-center gap-1"><Lucide name="clock" size={10} /> {formatDateTime(s.createdAt)}</span></div>
                                     <div><h3 className="font-bold text-lg text-slate-800 leading-tight">{s.title}</h3><p className="text-xs text-slate-400 line-clamp-1 italic mt-1">"{s.question}"</p></div>
@@ -505,7 +522,7 @@
                                     </div>
                                     <button onClick={e => { e.stopPropagation(); onToggleLike(res.id); }} className={`w-8 h-8 flex items-center justify-center rounded-xl transition-all shrink-0 ${res.liked ? 'bg-pink-50 text-pink-500' : 'text-slate-300 hover:bg-slate-50'}`}><Lucide name="heart" size={18} fill={res.liked ? "currentColor" : "none"} /></button>
                                 </div>
-                                <p className="font-bold text-slate-800 italic text-sm leading-relaxed break-words">"{res.answer}"</p>
+                                <p className="font-bold text-slate-800 italic text-sm leading-relaxed break-words line-clamp-3">"{res.answer}"</p>
                             </div>
                         ))}</div>
                     </section>
@@ -544,7 +561,7 @@
             return (
                 <div className="animate-in slide-in-from-bottom-8 duration-600 space-y-6">
                     <header className="flex justify-center items-center relative py-2">
-                        {isPreview && <button onClick={onBack} className="absolute left-0 icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button>}
+                        {isPreview && <button onClick={onBack} className="absolute left-0 icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="x" size={18} /></button>}
                         <h1 className="text-xl font-black text-slate-900 tracking-tight text-center w-full">{survey.title}</h1>
                     </header>
                     <div className="flex justify-center"><div className="inline-flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100"><Lucide name="shield-check" size={12} className="text-indigo-500" /><p className="text-[10px] font-black text-indigo-600 tracking-tight text-center">回答は匿名です。誰にもわかりません。</p></div></div>
