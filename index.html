@@ -17,7 +17,7 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Firebase SDK (Compat versions) -->
+    <!-- Firebase SDK (Compat versions for stability) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -165,12 +165,8 @@
                             <p className="text-sm text-slate-500 font-bold leading-relaxed">{message}</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <button onClick={onConfirm} className={`w-full py-3.5 rounded-2xl font-black text-sm transition-all active:scale-95 ${isDanger ? 'bg-pink-500 text-white shadow-lg' : 'bg-indigo-500 text-white shadow-lg'}`}>
-                                {confirmText}
-                            </button>
-                            <button onClick={onCancel} className="w-full py-3.5 rounded-2xl font-black text-sm text-slate-400">
-                                {cancelText}
-                            </button>
+                            <button onClick={onConfirm} className={`w-full py-3.5 rounded-2xl font-black text-sm transition-all active:scale-95 ${isDanger ? 'bg-pink-500 text-white shadow-lg' : 'bg-indigo-500 text-white shadow-lg'}`}>{confirmText}</button>
+                            <button onClick={onCancel} className="w-full py-3.5 rounded-2xl font-black text-sm text-slate-400">{cancelText}</button>
                         </div>
                     </div>
                 </div>
@@ -281,7 +277,6 @@
                     const cleanData = {};
                     Object.keys(data).forEach(key => { if(data[key] !== undefined) cleanData[key] = data[key]; });
                     const ref = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys');
-                    
                     if (id) {
                         await ref.doc(id).update(cleanData);
                         showToast("更新しました");
@@ -331,10 +326,12 @@
             const currentResponses = useMemo(() => responses.filter(r => r.surveyId === currentSurvey?.id).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)), [responses, currentSurvey]);
             const favoriteResponses = useMemo(() => responses.filter(r => r.liked), [responses]);
 
-            const navigate = (v, d = null) => {
-                setCurrentSurvey(d);
-                setView(v);
-                window.scrollTo(0,0);
+            const navigateTo = (newView, data = null, index = 0, isPreview = false) => {
+                setIsPreviewMode(isPreview);
+                if (data) setCurrentSurvey(data);
+                if (newView === 'share') setSelectedResponseIndex(index);
+                setView(newView);
+                window.scrollTo(0, 0);
             };
 
             if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-indigo-400 animate-pulse">coelog...</div>;
@@ -342,11 +339,11 @@
             return (
                 <div className="max-w-md mx-auto px-5 py-6 relative min-h-screen overflow-hidden">
                     {view === 'login' && <LoginView onLoginGoogle={handleLoginGoogle} />}
-                    {view === 'home' && <HomeView surveys={surveys} user={user} onLogoutRequest={() => setShowLogoutConfirm(true)} onNavigate={navigate} />}
-                    {view === 'favorites' && <FavoritesView responses={favoriteResponses} surveys={surveys} onNavigate={(v, d, i) => { setSelectedResponseIndex(i); navigate(v, d); }} onBack={() => setView('home')} />}
+                    {view === 'home' && <HomeView surveys={surveys} user={user} onLogoutRequest={() => setShowLogoutConfirm(true)} onNavigate={navigateTo} />}
+                    {view === 'favorites' && <FavoritesView responses={favoriteResponses} surveys={surveys} onNavigate={navigateTo} onBack={() => setView('home')} />}
                     {(view === 'create' || view === 'edit') && <SurveyFormView initialData={view === 'edit' ? currentSurvey : null} onSave={handleSaveSurvey} onBack={() => setView(view === 'edit' ? 'stats' : 'home')} />}
                     {view === 'respond' && <RespondView survey={currentSurvey} onSubmit={handleAddResponse} onBack={() => setView('stats')} isPreview={isPreviewMode} />}
-                    {view === 'stats' && <StatsView survey={currentSurvey} responses={currentResponses} onNavigate={(v, d, i) => { setSelectedResponseIndex(i); navigate(v, d); }} onBack={() => setView('home')} onDelete={handleDeleteSurvey} onDeleteResponse={handleDeleteResponse} onToggleLike={toggleLike} onCopy={handleCopyURL} />}
+                    {view === 'stats' && <StatsView survey={currentSurvey} responses={currentResponses} onNavigate={navigateTo} onBack={() => setView('home')} onDelete={handleDeleteSurvey} onDeleteResponse={handleDeleteResponse} onToggleLike={toggleLike} onCopy={handleCopyURL} />}
                     {view === 'share' && <ResponseGallery responses={currentSurvey ? currentResponses : favoriteResponses} initialIndex={selectedResponseIndex} survey={currentSurvey} surveys={surveys} onClose={() => setView(currentSurvey ? 'stats' : 'favorites')} />}
 
                     {notification && (
@@ -371,15 +368,15 @@
 
                     {['home', 'stats', 'favorites'].includes(view) && (
                         <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-auto bg-white/95 border border-slate-300 shadow-[0_15px_40px_rgba(0,0,0,0.08)] rounded-full flex items-center p-2 z-[100]">
-                            <button onClick={() => navigate('home')} className={`icon-btn-circle transition-all ${view === 'home' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
+                            <button onClick={() => navigateTo('home')} className={`icon-btn-circle transition-all ${view === 'home' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
                                 <Lucide name="layout" size={20} />
                             </button>
                             <div className="w-4 shrink-0" />
-                            <button onClick={() => navigate('create')} className={`icon-btn-circle transition-all ${view === 'create' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
+                            <button onClick={() => navigateTo('create')} className={`icon-btn-circle transition-all ${view === 'create' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
                                 <Lucide name="plus" size={20} />
                             </button>
                             <div className="w-4 shrink-0" />
-                            <button onClick={() => navigate('favorites')} className={`icon-btn-circle transition-all ${view === 'favorites' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
+                            <button onClick={() => navigateTo('favorites')} className={`icon-btn-circle transition-all ${view === 'favorites' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
                                 <Lucide name="heart" size={20} fill={view === 'favorites' ? "currentColor" : "none"} />
                             </button>
                         </nav>
@@ -501,7 +498,7 @@
             
             return (
                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-400 pb-24">
-                    <header className="flex items-center justify-between py-1"><button onClick={onBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="icon-btn-circle text-indigo-600 bg-white shadow-sm border-visible border-indigo-200 active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
+                    <header className="flex items-center justify-between py-1"><button onClick={onBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
                     <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button><button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
                     <section className="space-y-4"><div className="flex justify-between items-center px-2 text-[10px] font-black text-slate-500 uppercase tracking-widest"><h3>最近の回答</h3><button onClick={() => setShowDeleteConfirm(true)} className="text-pink-500 flex items-center gap-1"><Lucide name="trash-2" size={11} /> 削除</button></div>
                         <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => {
@@ -567,9 +564,9 @@
             return (
                 <div className={`fixed inset-0 z-50 ${theme.class} flex flex-col items-center justify-center p-4 animate-in fade-in duration-500`}>
                     <div className="relative w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-full" style={{ maxHeight: '90vh' }}>
-                        <header className="flex items-center justify-center relative p-4 border-b border-white/10 shrink-0 min-h-[60px]">
+                        <header className="flex items-center justify-center relative p-4 border-b border-white/10 shrink-0">
                             {isPreview && <button onClick={onBack} className="absolute left-4 top-1/2 -translate-y-1/2 icon-btn-circle text-white bg-white/20 hover:bg-white/30 transition-all z-50"><Lucide name="arrow-left" size={20} /></button>}
-                            <h1 className="text-sm font-black text-white tracking-wider uppercase opacity-80 truncate px-16 w-full text-center">{survey.title}</h1>
+                            <h1 className="text-sm font-black text-white tracking-wider uppercase opacity-80 truncate px-12">{survey.title}</h1>
                         </header>
 
                         <div className="overflow-y-auto p-6 flex flex-col items-center custom-scrollbar w-full">
@@ -630,7 +627,7 @@
                                 </div>
                                 <div className="flex-1 flex flex-col justify-center items-center p-6 overflow-hidden relative">
                                     <div className="w-full border-b border-white/20 pb-4 mb-6">{activeSurvey && <div className="text-white/90 text-sm font-bold leading-relaxed text-center">"{activeSurvey.question}"</div>}</div>
-                                    <div className={`w-full text-center text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`} style={{ lineHeight: '1.6' }}>"{response.answer}"</div>
+                                    <div className={`w-full text-center text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`}>"{response.answer}"</div>
                                     {!response.allowSns && <div className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-pink-500/50 rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shadow-lg"><Lucide name="lock" size={10} /> SNS不可</div>}
                                 </div>
                             </div>
