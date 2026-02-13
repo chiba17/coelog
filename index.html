@@ -17,7 +17,7 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Firebase SDK (Compat versions) -->
+    <!-- Firebase SDK (Compat versions for stability) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -33,7 +33,8 @@
         
         .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-        
+
+        /* スムースで可愛いアニメーション (復旧) */
         @keyframes popIn {
             0% { transform: scale(0.5); opacity: 0; }
             60% { transform: scale(1.1); opacity: 1; }
@@ -46,6 +47,12 @@
             to { transform: translateY(0); opacity: 1; }
         }
         .animate-slide-up { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
         
         .delay-100 { animation-delay: 100ms; }
         .delay-200 { animation-delay: 200ms; }
@@ -211,7 +218,6 @@
                     await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
                     const params = new URLSearchParams(window.location.search);
                     const surveyId = params.get('id');
-
                     auth.onAuthStateChanged(async (u) => {
                         if (u) {
                             setUser(u);
@@ -224,10 +230,7 @@
                                     } else {
                                         setView('home'); 
                                     }
-                                } catch (e) {
-                                    console.error(e);
-                                    setView('home');
-                                }
+                                } catch(e) { console.error(e); setView('home'); }
                             } else {
                                 setView('home'); 
                             }
@@ -250,12 +253,10 @@
                 const unsubSurveys = path.collection('surveys').onSnapshot(snap => {
                     const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     setSurveys(data.filter(s => s.creatorId === user.uid).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
-                }, e => console.error("Survey Error:", e));
-                
+                }, e => console.error(e));
                 const unsubResponses = path.collection('responses').onSnapshot(snap => {
                     setResponses(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-                }, e => console.error("Response Error:", e));
-                
+                }, e => console.error(e));
                 return () => { unsubSurveys(); unsubResponses(); };
             }, [user, appId]);
 
@@ -270,9 +271,9 @@
                 } catch (e) {
                     console.error(e);
                     if (e.code === 'auth/unauthorized-domain') {
-                        alert("エラー: このドメインは許可されていません。Firebase ConsoleでAuthentication > Settings > Authorized domains にドメインを追加してください。");
+                        alert("エラー: 許可されていないドメインです。Firebase Consoleで設定を確認してください。");
                     } else {
-                        showToast("ログイン失敗: " + e.message);
+                        showToast("ログイン失敗");
                     }
                 }
             };
@@ -284,7 +285,6 @@
                 showToast("ログアウトしました");
             };
 
-            // URLコピー機能の修正（画面揺れ防止）
             const handleCopyURL = () => {
                 if (!currentSurvey) return;
                 const url = window.location.origin + window.location.pathname + "?id=" + currentSurvey.id;
@@ -292,8 +292,6 @@
                 textArea.value = url;
                 textArea.style.position = "fixed";
                 textArea.style.left = "-9999px";
-                textArea.style.top = "0";
-                textArea.readOnly = true; // キーボード表示防止
                 document.body.appendChild(textArea);
                 textArea.select();
                 try {
@@ -312,7 +310,6 @@
                     const cleanData = {};
                     Object.keys(data).forEach(key => { if(data[key] !== undefined) cleanData[key] = data[key]; });
                     const ref = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys');
-                    
                     if (id) {
                         await ref.doc(id).update(cleanData);
                         showToast("更新しました");
@@ -376,7 +373,7 @@
                 <div className="max-w-md mx-auto px-5 py-6 relative min-h-screen overflow-hidden">
                     {view === 'login' && <LoginView onLoginGoogle={handleLoginGoogle} />}
                     {view === 'home' && <HomeView surveys={surveys} user={user} onLogoutRequest={() => setShowLogoutConfirm(true)} onNavigate={navigate} />}
-                    {view === 'favorites' && <FavoritesView responses={favoriteResponses} surveys={surveys} onNavigate={navigate} onBack={() => setView('home')} />}
+                    {view === 'favorites' && <FavoritesView responses={favoriteResponses} surveys={surveys} onNavigate={(v, d, i) => { setSelectedResponseIndex(i); navigate(v, d); }} onBack={() => setView('home')} />}
                     {(view === 'create' || view === 'edit') && <SurveyFormView initialData={view === 'edit' ? currentSurvey : null} onSave={handleSaveSurvey} onBack={() => setView(view === 'edit' ? 'stats' : 'home')} />}
                     {view === 'respond' && <RespondView survey={currentSurvey} onSubmit={handleAddResponse} onBack={() => setView('stats')} isPreview={isPreviewMode} />}
                     {view === 'stats' && <StatsView survey={currentSurvey} responses={currentResponses} onNavigate={navigate} onBack={() => setView('home')} onDelete={handleDeleteSurvey} onDeleteResponse={handleDeleteResponse} onToggleLike={toggleLike} onCopy={handleCopyURL} />}
@@ -525,12 +522,36 @@
             );
         }
 
+        // --- Stats View & Components ---
+        // クラッシュ防止のため、リストアイテムを別コンポーネント化
+        const ResponseItem = ({ res, survey, index, length, onNavigate, onToggleLike, setDeleteResId }) => {
+            const longPressProps = useLongPress(() => setDeleteResId(res.id), 800);
+            
+            return (
+                <div 
+                    onClick={() => onNavigate('share', survey, index)}
+                    {...longPressProps}
+                    onContextMenu={(e) => { e.preventDefault(); setDeleteResId(res.id); }}
+                    className={`bg-white border-visible p-5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] select-none no-callout ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}
+                >
+                    <div className="flex items-start justify-between pointer-events-none">
+                        <div className="flex flex-col gap-1.5 w-full pr-2">
+                            <div className="flex items-center gap-2">
+                                <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-[9px] shrink-0 ${res.allowSns ? 'bg-indigo-50 text-indigo-500' : 'bg-pink-50 text-pink-500'}`}>{res.allowSns ? `#${length - index}` : <Lucide name="lock" size={10} />}</div>
+                                <div className="text-[10px] text-slate-500 font-bold">{formatDateTime(res.createdAt)}</div>
+                                {!res.allowSns && <span className="text-[8px] font-black text-pink-400 uppercase tracking-tighter shrink-0 border border-pink-100 px-1.5 py-0.5 rounded-full">SNS不可</span>}
+                            </div>
+                        </div>
+                        <button onClick={e => { e.stopPropagation(); onToggleLike(res.id); }} className={`pointer-events-auto w-8 h-8 flex items-center justify-center rounded-xl transition-all shrink-0 ${res.liked ? 'bg-pink-50 text-pink-500' : 'text-slate-300 hover:bg-slate-50'}`}><Lucide name="heart" size={18} fill={res.liked ? "currentColor" : "none"} /></button>
+                    </div>
+                    <p className="font-bold text-slate-800 italic text-sm leading-relaxed break-words line-clamp-3 pointer-events-none">"{res.answer}"</p>
+                </div>
+            );
+        };
+
         function StatsView({ survey, responses, onNavigate, onBack, onDelete, onDeleteResponse, onToggleLike, onCopy }) {
             const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
             const [deleteResId, setDeleteResId] = useState(null);
-            
-            // クラッシュ防止：長押しイベントをReact標準イベントでバインド
-            const bindLongPress = (id) => useLongPress(() => setDeleteResId(id), 800);
             const theme = GRADIENTS.find(g => g.id === survey?.gradientId) || GRADIENTS[0];
             
             return (
@@ -538,29 +559,18 @@
                     <header className="flex items-center justify-between py-1"><button onClick={onBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="icon-btn-circle text-indigo-600 bg-white shadow-sm border-visible border-indigo-200 active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
                     <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button><button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
                     <section className="space-y-4"><div className="flex justify-between items-center px-2 text-[10px] font-black text-slate-500 uppercase tracking-widest"><h3>最近の回答</h3><button onClick={() => setShowDeleteConfirm(true)} className="text-pink-500 flex items-center gap-1"><Lucide name="trash-2" size={11} /> 削除</button></div>
-                        <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => {
-                             // 長押しフックの安全な適用
-                             const longPressProps = bindLongPress(res.id);
-                             return (
-                                <div key={res.id} 
-                                     onClick={() => onNavigate('share', survey, i)}
-                                     {...longPressProps}
-                                     onContextMenu={(e) => { e.preventDefault(); setDeleteResId(res.id); }}
-                                     className={`bg-white border-visible p-5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] select-none no-callout ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}>
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex flex-col gap-1.5 w-full pr-2">
-                                            <div className="flex items-center gap-2">
-                                                <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-[9px] shrink-0 ${res.allowSns ? 'bg-indigo-50 text-indigo-500' : 'bg-pink-50 text-pink-500'}`}>{res.allowSns ? `#${responses.length - i}` : <Lucide name="lock" size={10} />}</div>
-                                                <div className="text-[10px] text-slate-500 font-bold">{formatDateTime(res.createdAt)}</div>
-                                                {!res.allowSns && <span className="text-[8px] font-black text-pink-400 uppercase tracking-tighter shrink-0 border border-pink-100 px-1.5 py-0.5 rounded-full">SNS不可</span>}
-                                            </div>
-                                        </div>
-                                        <button onClick={e => { e.stopPropagation(); onToggleLike(res.id); }} className={`w-8 h-8 flex items-center justify-center rounded-xl transition-all shrink-0 ${res.liked ? 'bg-pink-50 text-pink-500' : 'text-slate-300 hover:bg-slate-50'}`}><Lucide name="heart" size={18} fill={res.liked ? "currentColor" : "none"} /></button>
-                                    </div>
-                                    <p className="font-bold text-slate-800 italic text-sm leading-relaxed break-words line-clamp-3">"{res.answer}"</p>
-                                </div>
-                            );
-                        })}</div>
+                        <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => (
+                            <ResponseItem 
+                                key={res.id} 
+                                res={res} 
+                                survey={survey} 
+                                index={i} 
+                                length={responses.length} 
+                                onNavigate={onNavigate} 
+                                onToggleLike={onToggleLike} 
+                                setDeleteResId={setDeleteResId} 
+                            />
+                        ))}</div>
                     </section>
                     <ConfirmModal isOpen={showDeleteConfirm} title="アンケートの削除" message="アンケートとすべての回答が完全に削除されます。よろしいですか？" confirmText="削除する" cancelText="キャンセル" isDanger={true} onConfirm={() => { setShowDeleteConfirm(false); onDelete(survey.id); }} onCancel={() => setShowDeleteConfirm(false)} />
                     <ConfirmModal isOpen={!!deleteResId} title="回答の削除" message="この回答を削除しますか？" confirmText="削除する" cancelText="キャンセル" isDanger={true} onConfirm={() => { onDeleteResponse(deleteResId); setDeleteResId(null); }} onCancel={() => setDeleteResId(null)} />
@@ -585,12 +595,13 @@
 
             const theme = GRADIENTS.find(g => g.id === survey?.gradientId) || GRADIENTS[0];
 
+            // 修正: リッチなアニメーション付きのThank You画面（復旧）
             if (submitted) return (
                 <div className={`fixed inset-0 z-50 ${theme.class} flex flex-col items-center justify-center p-6 animate-in zoom-in-95 duration-500`}>
-                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-10 shadow-2xl w-full max-w-sm text-center animate-scale-in">
+                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-10 shadow-2xl w-full max-w-sm text-center animate-scale-in">
                         <div className="w-20 h-20 bg-white text-indigo-500 rounded-full flex items-center justify-center shadow-lg mb-6 mx-auto animate-float"><Lucide name="check" size={36} strokeWidth={4} /></div>
                         <h2 className="text-2xl font-black text-white tracking-tight mb-2 drop-shadow-md animate-slide-up delay-100">Thank You!</h2>
-                        <p className="text-white/80 text-sm font-bold leading-relaxed mb-10 animate-slide-up delay-200">回答ありがとうございました。</p>
+                        <p className="text-white/80 text-xs font-bold leading-relaxed mb-10 animate-slide-up delay-200">回答ありがとうございました。</p>
                         {isPreview ? 
                             <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all hover:shadow-2xl animate-slide-up delay-300">回答一覧に戻る</button> : 
                             <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95 animate-slide-up delay-300">画面を閉じる</button>
@@ -643,27 +654,14 @@
             );
         }
 
+        // --- 修正: ナビゲーション・テキスト削除済みのギャラリー ---
         function ResponseGallery({ responses, initialIndex, survey, surveys, onClose }) {
-            // 安全策: データがない場合のガード
-            if (!responses || responses.length === 0 || !responses[initialIndex]) return null;
-            
             const [index, setIndex] = useState(initialIndex);
-            // インデックスが範囲外にならないよう監視
-            useEffect(() => {
-                if (index >= responses.length) {
-                    setIndex(Math.max(0, responses.length - 1));
-                }
-            }, [responses.length]);
-
             const response = responses[index];
-            if (!response) return null; // 再度ガード
-
+            if (!response) return null;
             const activeSurvey = survey || surveys.find(s => s.id === response.surveyId);
             const theme = GRADIENTS.find(g => g.id === activeSurvey?.gradientId) || GRADIENTS[0];
             const getFontSize = (text) => text.length < 20 ? 'text-4xl' : text.length < 40 ? 'text-3xl' : text.length < 80 ? 'text-2xl' : 'text-xl';
-            const goPrev = (e) => { e.stopPropagation(); if (index > 0) setIndex(index - 1); };
-            const goNext = (e) => { e.stopPropagation(); if (index < responses.length - 1) setIndex(index + 1); };
-            
             return (
                 <div className={`fixed inset-0 z-[100] ${theme.class} flex flex-col h-full w-full animate-in fade-in duration-300`}>
                     <div className="absolute top-0 left-0 w-full p-4 pt-safe z-20 flex justify-end items-center pointer-events-none">
@@ -679,19 +677,12 @@
                                 </div>
                                 <div className="flex-1 flex flex-col justify-center items-center p-6 overflow-hidden relative">
                                     <div className="w-full border-b border-white/20 pb-4 mb-6">{activeSurvey && <div className="text-white/90 text-sm font-bold leading-relaxed text-center">"{activeSurvey.question}"</div>}</div>
-                                    <div className={`w-full text-center text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`} style={{ lineHeight: '1.6' }}>"{response.answer}"</div>
+                                    <div className={`w-full text-center text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`}>"{response.answer}"</div>
                                     {!response.allowSns && <div className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-pink-500/50 rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shadow-lg"><Lucide name="lock" size={10} /> SNS不可</div>}
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {/* ナビゲーションボタン (複数ある場合のみ表示) */}
-                    {responses.length > 1 && (
-                        <div className="absolute bottom-0 w-full p-6 pb-safe z-20 flex justify-center gap-12 pointer-events-none">
-                            <button onClick={goPrev} disabled={index === 0} className={`pointer-events-auto w-12 h-12 rounded-full flex items-center justify-center transition-all ${index === 0 ? 'text-white/10 bg-white/5 cursor-not-allowed' : 'text-white bg-white/10 border border-white/20 shadow-lg active:scale-95 hover:bg-white/20 backdrop-blur-md'}`}><Lucide name="chevron-left" size={24} /></button>
-                            <button onClick={goNext} disabled={index === responses.length - 1} className={`pointer-events-auto w-12 h-12 rounded-full flex items-center justify-center transition-all ${index === responses.length - 1 ? 'text-white/10 bg-white/5 cursor-not-allowed' : 'text-white bg-white/10 border border-white/20 shadow-lg active:scale-95 hover:bg-white/20 backdrop-blur-md'}`}><Lucide name="chevron-right" size={24} /></button>
-                        </div>
-                    )}
                 </div>
             );
         }
