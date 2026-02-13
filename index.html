@@ -17,7 +17,7 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Firebase SDK (Compat versions) -->
+    <!-- Firebase SDK (Compat versions for stability) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -33,39 +33,39 @@
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         
-        /* 歪み防止：正円を維持 */
-        .icon-btn-circle {
-            width: 44px !important;
-            height: 44px !important;
+        /* 固定サイズの正円ボタン */
+        .btn-circle { 
+            width: 44px !important; 
+            height: 44px !important; 
             min-width: 44px !important;
             min-height: 44px !important;
-            max-width: 44px !important;
-            max-height: 44px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            flex-shrink: 0 !important;
+            display: flex !important; 
+            align-items: center !important; 
+            justify-content: center !important; 
+            flex-shrink: 0 !important; 
             border-radius: 9999px !important;
-            padding: 0 !important;
         }
 
-        /* 視認性の高いボーダー */
-        .border-main { border: 1.5px solid #cbd5e1 !important; }
-        .border-active { border-color: #818cf8 !important; }
+        /* 視認性の高い枠線 */
+        .border-visible { border: 1.5px solid #cbd5e1 !important; }
+        .border-visible:focus-within { border-color: #818cf8 !important; }
 
         .google-btn {
             background-color: white;
             border: 1px solid #cbd5e1;
             color: #334155;
             font-weight: 700;
-            padding: 8px 14px;
+            padding: 10px 20px;
             border-radius: 9999px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            gap: 10px;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
+        
+        /* リストなどの角丸調整 */
+        .rounded-card { border-radius: 1.5rem !important; } /* rounded-3xl相当 */
     </style>
 </head>
 <body class="antialiased">
@@ -88,7 +88,9 @@
         };
 
         const config = getFirebaseConfig();
-        if (!firebase.apps.length) firebase.initializeApp(config);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(config);
+        }
         const auth = firebase.auth();
         const db = firebase.firestore();
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'coelog-718ad';
@@ -123,15 +125,15 @@
                     lucide.createIcons();
                 }
             }, [name, size, fill, strokeWidth]);
-            return <span ref={iconRef} className={`inline-flex items-center justify-center shrink-0 ${className}`}></span>;
+            return <span ref={iconRef} className={`inline-flex items-center justify-center shrink-0 aspect-square ${className}`}></span>;
         };
 
         function ConfirmModal({ isOpen, title, message, confirmText, cancelText, onConfirm, onCancel, isDanger = false }) {
             if (!isOpen) return null;
             return (
-                <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-[5000] flex items-center justify-center p-6">
                     <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onCancel} />
-                    <div className="relative bg-white w-full max-w-[320px] rounded-[2.5rem] p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
+                    <div className="relative bg-white w-full max-w-[320px] rounded-3xl p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
                         <div className="flex flex-col items-center text-center space-y-3">
                             <div className={`p-3 rounded-2xl ${isDanger ? 'bg-pink-50 text-pink-500' : 'bg-indigo-50 text-indigo-500'}`}>
                                 <Lucide name="alert-circle" size={24} />
@@ -140,10 +142,10 @@
                             <p className="text-sm text-slate-500 font-bold leading-relaxed">{message}</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <button onClick={onConfirm} className={`w-full py-4 rounded-2xl font-black text-sm transition-all active:scale-95 ${isDanger ? 'bg-pink-500 text-white shadow-lg' : 'bg-indigo-500 text-white shadow-lg'}`}>
+                            <button onClick={onConfirm} className={`w-full py-3.5 rounded-2xl font-black text-sm transition-all active:scale-95 ${isDanger ? 'bg-pink-500 text-white shadow-lg' : 'bg-indigo-500 text-white shadow-lg'}`}>
                                 {confirmText}
                             </button>
-                            <button onClick={onCancel} className="w-full py-4 rounded-2xl font-black text-sm text-slate-400">
+                            <button onClick={onCancel} className="w-full py-3.5 rounded-2xl font-black text-sm text-slate-400">
                                 {cancelText}
                             </button>
                         </div>
@@ -154,14 +156,13 @@
 
         function App() {
             const [user, setUser] = useState(null);
-            const [view, setView] = useState('home');
+            const [view, setView] = useState('loading'); 
             const [surveys, setSurveys] = useState([]);
             const [responses, setResponses] = useState([]);
             const [currentSurvey, setCurrentSurvey] = useState(null);
             const [selectedResponseIndex, setSelectedResponseIndex] = useState(0);
             const [notification, setNotification] = useState(null);
             const [isPreviewMode, setIsPreviewMode] = useState(false);
-            const [loading, setLoading] = useState(true);
             const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
             useEffect(() => {
@@ -173,29 +174,23 @@
 
                     auth.onAuthStateChanged(async (u) => {
                         if (u) {
-                            // ログイン済み (管理者 or 以前の回答者)
                             setUser(u);
                             if (surveyId) {
-                                // 回答モードで起動した場合、データ取得して遷移
                                 const doc = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys').doc(surveyId).get();
                                 if (doc.exists) {
                                     setCurrentSurvey({ id: doc.id, ...doc.data() });
                                     setView('respond');
                                 } else {
-                                    // アンケートが存在しない場合はホームへ（管理者の場合）またはエラー
                                     setView('home'); 
                                 }
+                            } else {
+                                setView('home'); // ログイン済みならホームへ
                             }
-                            setLoading(false);
                         } else {
-                            // 未ログイン
                             if (surveyId) {
-                                // 回答モードなら、自動で匿名ログインして回答画面へ
                                 await auth.signInAnonymously();
                             } else {
-                                // 管理モードならログイン画面へ
-                                setView('login');
-                                setLoading(false);
+                                setView('login'); // 未ログインならログイン画面へ
                             }
                         }
                     });
@@ -207,13 +202,11 @@
                 if (!user) return;
                 const path = db.collection('artifacts').doc(appId).collection('public').doc('data');
                 
-                // 管理者が自分のアンケートを取得
                 const unsubSurveys = path.collection('surveys').onSnapshot(snap => {
                     const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     setSurveys(data.filter(s => s.creatorId === user.uid).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
                 }, e => console.error(e));
 
-                // 回答の取得
                 const unsubResponses = path.collection('responses').onSnapshot(snap => {
                     setResponses(snap.docs.map(d => ({ id: d.id, ...d.data() })));
                 }, e => console.error(e));
@@ -228,6 +221,7 @@
                 try {
                     await auth.signInWithPopup(provider);
                     showToast("ログインしました");
+                    setView('home'); // ログイン後にホームへ
                 } catch (e) {
                     console.error(e);
                     showToast("ログイン失敗");
@@ -282,13 +276,8 @@
 
             const handleAddResponse = async (answer, allowSns) => {
                 try {
-                    const ref = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('responses');
-                    await ref.add({ 
-                        surveyId: currentSurvey.id, 
-                        answer, 
-                        allowSns, 
-                        liked: false, 
-                        createdAt: firebase.firestore.Timestamp.now() 
+                    await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('responses').add({
+                        surveyId: currentSurvey.id, answer, allowSns, liked: false, createdAt: firebase.firestore.Timestamp.now()
                     });
                     showToast("届けました");
                 } catch (e) { showToast("送信失敗"); }
@@ -318,7 +307,7 @@
                 window.scrollTo(0,0);
             };
 
-            if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-indigo-400 animate-pulse">coelog...</div>;
+            if (view === 'loading') return <div className="min-h-screen flex items-center justify-center font-black text-indigo-400 animate-pulse">coelog...</div>;
 
             return (
                 <div className="max-w-md mx-auto px-5 py-6 relative min-h-screen overflow-hidden">
@@ -326,7 +315,7 @@
                     {view === 'home' && <HomeView surveys={surveys} user={user} onLogoutRequest={() => setShowLogoutConfirm(true)} onNavigate={navigate} />}
                     {view === 'favorites' && <FavoritesView responses={favoriteResponses} surveys={surveys} onNavigate={(v, d, i) => { setSelectedResponseIndex(i); navigate(v, d); }} onBack={() => setView('home')} />}
                     {(view === 'create' || view === 'edit') && <SurveyFormView initialData={view === 'edit' ? currentSurvey : null} onSave={handleSaveSurvey} onBack={() => setView(view === 'edit' ? 'stats' : 'home')} />}
-                    {view === 'respond' && <RespondView survey={currentSurvey} onSubmit={handleAddResponse} onBack={() => setView('stats')} />}
+                    {view === 'respond' && <RespondView survey={currentSurvey} onSubmit={handleAddResponse} onBack={() => setView(isPreviewMode ? 'stats' : 'home')} isPreview={isPreviewMode} />}
                     {view === 'stats' && <StatsView survey={currentSurvey} responses={currentResponses} onNavigate={(v, d, i) => { setSelectedResponseIndex(i); navigate(v, d); }} onBack={() => setView('home')} onDelete={handleDeleteSurvey} onToggleLike={toggleLike} onCopy={handleCopyURL} />}
                     {view === 'share' && <ResponseGallery responses={currentSurvey ? currentResponses : favoriteResponses} initialIndex={selectedResponseIndex} survey={currentSurvey} surveys={surveys} onClose={() => setView(currentSurvey ? 'stats' : 'favorites')} />}
 
@@ -352,15 +341,15 @@
 
                     {['home', 'stats', 'favorites'].includes(view) && (
                         <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-auto bg-white/95 border border-slate-300 shadow-[0_15px_40px_rgba(0,0,0,0.08)] rounded-full flex items-center p-2 z-[100]">
-                            <button onClick={() => navigate('home')} className={`icon-btn-circle transition-all ${view === 'home' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
+                            <button onClick={() => navigate('home')} className={`btn-circle transition-all ${view === 'home' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
                                 <Lucide name="layout" size={20} />
                             </button>
                             <div className="w-4 shrink-0" />
-                            <button onClick={() => navigate('create')} className={`icon-btn-circle transition-all ${view === 'create' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
+                            <button onClick={() => navigate('create')} className={`btn-circle transition-all ${view === 'create' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
                                 <Lucide name="plus" size={20} />
                             </button>
                             <div className="w-4 shrink-0" />
-                            <button onClick={() => navigate('favorites')} className={`icon-btn-circle transition-all ${view === 'favorites' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
+                            <button onClick={() => navigate('favorites')} className={`btn-circle transition-all ${view === 'favorites' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
                                 <Lucide name="heart" size={20} fill={view === 'favorites' ? "currentColor" : "none"} />
                             </button>
                         </nav>
@@ -382,7 +371,7 @@
                     </div>
                     
                     <div className="w-full max-w-xs space-y-4">
-                        <button onClick={onLoginGoogle} className="w-full py-4 rounded-[2rem] bg-white border border-slate-200 shadow-lg flex items-center justify-center gap-3 font-bold text-slate-600 hover:bg-slate-50 transition-all active:scale-95">
+                        <button onClick={onLoginGoogle} className="google-btn w-full justify-center py-4 text-base active:scale-95 transition-all">
                             <Lucide name="mail" size={20} />
                             Googleで始める
                         </button>
@@ -395,7 +384,7 @@
             return (
                 <div className="space-y-6 animate-in fade-in duration-500">
                     <header className="flex items-center justify-between py-1">
-                        <button onClick={onLogoutRequest} className="icon-btn-circle text-slate-400 bg-white shadow-sm border-main active:scale-90 transition-all">
+                        <button onClick={onLogoutRequest} className="btn-circle text-slate-400 bg-white shadow-sm border-visible active:scale-90 transition-all">
                              <Lucide name="log-out" size={18} />
                         </button>
                         <h1 className="text-xl font-black tracking-tighter text-slate-900">coelog</h1>
@@ -403,9 +392,9 @@
                     </header>
                     <div className="grid gap-4 pb-24">
                         {surveys.length === 0 ? (
-                            <button onClick={() => onNavigate('create')} className="w-full bg-white border-2 border-dashed border-slate-300 rounded-[2.2rem] py-12 text-center space-y-3"><Lucide name="plus" size={24} className="mx-auto text-indigo-200" /><p className="text-slate-500 text-xs font-bold">アンケートを作成</p></button>
+                            <button onClick={() => onNavigate('create')} className="w-full bg-white border-2 border-dashed border-slate-300 rounded-card py-12 text-center space-y-3"><Lucide name="plus" size={24} className="mx-auto text-indigo-200" /><p className="text-slate-500 text-xs font-bold">アンケートを作成</p></button>
                         ) : surveys.map(s => (
-                            <button key={s.id} onClick={() => onNavigate('stats', s)} className="bg-white border-main p-5 rounded-[2rem] text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
+                            <button key={s.id} onClick={() => onNavigate('stats', s)} className="bg-white border-visible p-5 rounded-card text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center text-slate-400 font-black text-[9px]"><div className="p-1.5 bg-indigo-50 text-indigo-500 rounded-xl"><Lucide name="message-circle" size={14} /></div><span className="flex items-center gap-1"><Lucide name="clock" size={10} /> {formatDateTime(s.createdAt)}</span></div>
                                     <div><h3 className="font-bold text-lg text-slate-800 leading-tight">{s.title}</h3><p className="text-xs text-slate-400 line-clamp-1 italic mt-1">"{s.question}"</p></div>
@@ -422,10 +411,10 @@
                 <div className="space-y-6 animate-in fade-in duration-500">
                     <header className="flex flex-col py-1"><h1 className="text-2xl font-black text-slate-900">お気に入り</h1><p className="text-slate-400 text-xs font-bold">心に残った大切な声</p></header>
                     <div className="grid gap-3 pb-24">
-                        {responses.length === 0 ? <div className="bg-white/40 border-2 border-dashed border-slate-300 rounded-[2rem] py-16 text-center text-slate-300 text-xs font-bold italic">まだありません</div> : responses.map((res, i) => {
+                        {responses.length === 0 ? <div className="bg-white/40 border-2 border-dashed border-slate-300 rounded-card py-16 text-center text-slate-300 text-xs font-bold italic">まだありません</div> : responses.map((res, i) => {
                             const s = surveys.find(sur => sur.id === res.surveyId);
                             return (
-                                <button key={res.id} onClick={() => onNavigate('share', null, i)} className="bg-white border-main p-5 rounded-[1.8rem] text-left shadow-sm hover:shadow-indigo-50 transition-all">
+                                <button key={res.id} onClick={() => onNavigate('share', null, i)} className="bg-white border-visible p-5 rounded-card text-left shadow-sm hover:shadow-indigo-50 transition-all active:scale-[0.98]">
                                     <div className="space-y-2"><div className="flex justify-between text-[9px] font-black text-indigo-400 uppercase tracking-widest"><span>{s?.title || "テーマ不明"}</span><span className="text-slate-400">{formatDateTime(res.createdAt)}</span></div><p className="font-bold text-slate-700 leading-relaxed italic text-sm line-clamp-3">"{res.answer}"</p></div>
                                 </button>
                             );
@@ -444,16 +433,16 @@
             return (
                 <div className="space-y-4 animate-in slide-in-from-right-4 duration-400 pb-20">
                     <header className="flex items-center justify-between py-1">
-                        <button onClick={() => (title || question ? setShowConfirm(true) : onBack())} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-main active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button>
+                        <button onClick={() => (title || question ? setShowConfirm(true) : onBack())} className="btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button>
                         <h2 className="font-black text-sm text-slate-900">{isEdit ? '内容を編集' : '新しく作る'}</h2><div className="w-11 h-11 shrink-0" />
                     </header>
-                    <div className="bg-white border-main rounded-[2.2rem] p-6 shadow-sm space-y-6">
+                    <div className="bg-white border-visible rounded-card p-6 shadow-sm space-y-6">
                         <div className="space-y-2"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">アンケート名</label><input type="text" placeholder="例：次回のテーマについて" className="w-full bg-transparent border-b-2 border-slate-200 focus:border-indigo-400 outline-none py-1.5 text-xl font-bold transition-all placeholder:text-slate-300" value={title} onChange={e => setTitle(e.target.value)} /></div>
                         <div className="space-y-2"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">質問の内容</label><textarea placeholder="聞きたいことをひとつだけ" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold focus:bg-white focus:border-indigo-400 outline-none transition-all resize-none h-32" value={question} onChange={e => setQuestion(e.target.value)} /></div>
                         <div className="space-y-3 pt-1"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">デザイン</label><div className="flex flex-wrap gap-3 px-1">{GRADIENTS.map(g => (<button key={g.id} onClick={() => setGradientId(g.id)} className={`w-9 h-9 rounded-full transition-all relative ${g.class} ${gradientId === g.id ? 'scale-110 ring-4 ring-indigo-50 shadow-md' : 'opacity-60'}`}>{gradientId === g.id && <Lucide name="check" size={14} className="text-white mx-auto drop-shadow-md" />}</button>))}</div></div>
                     </div>
                     <div className="flex flex-col items-center gap-4 pt-4">
-                        <button onClick={() => onSave({ id: initialData?.id, title, question, gradientId })} disabled={!title || !question} className={`px-12 py-4 h-14 rounded-full font-black text-lg text-white shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all ${!title || !question ? 'bg-slate-300' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 border border-indigo-400'}`}>{isEdit ? '保存する' : '公開する'} <Lucide name="send" size={20} /></button>
+                        <button onClick={() => onSave({ id: initialData?.id, title, question, gradientId })} disabled={!title || !question} className={`px-12 py-4 h-14 rounded-full font-black text-lg text-white shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all ${!title || !question ? 'bg-slate-300 shadow-none' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 border border-indigo-400'}`}>{isEdit ? '保存する' : '公開する'} <Lucide name="send" size={20} /></button>
                         <button onClick={onBack} className="text-slate-500 font-bold text-sm hover:text-slate-800 transition-colors py-2 px-6">キャンセル</button>
                     </div>
                     <ConfirmModal isOpen={showConfirm} title="確認" message="入力した内容は保存されませんが、よろしいですか？" confirmText="破棄して戻る" cancelText="続ける" onConfirm={onBack} onCancel={() => setShowConfirm(false)} />
@@ -466,11 +455,11 @@
             const theme = GRADIENTS.find(g => g.id === survey?.gradientId) || GRADIENTS[0];
             return (
                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-400 pb-24">
-                    <header className="flex items-center justify-between py-1"><button onClick={onBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-main active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="icon-btn-circle text-indigo-50 bg-white shadow-sm border-main active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
-                    <div className={`${theme.class} rounded-[2.2rem] py-5 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button><button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> 回答画面</button></div></div>
+                    <header className="flex items-center justify-between py-1"><button onClick={onBack} className="btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="btn-circle text-indigo-600 bg-white shadow-sm border-visible border-indigo-200 active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
+                    <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button><button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
                     <section className="space-y-4"><div className="flex justify-between items-center px-2 text-[10px] font-black text-slate-500 uppercase tracking-widest"><h3>最近の回答</h3><button onClick={() => setShowDeleteConfirm(true)} className="text-pink-500 flex items-center gap-1"><Lucide name="trash-2" size={11} /> 削除</button></div>
-                        <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-main border-dashed rounded-[1.8rem] py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => (
-                            <div key={res.id} onClick={() => onNavigate('share', survey, i)} className={`bg-white border-main p-4.5 rounded-[1.8rem] flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}><div className="flex items-center justify-between"><div className="flex items-center gap-2.5"><div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-[10px] shrink-0 ${res.allowSns ? 'bg-indigo-50 text-indigo-500' : 'bg-pink-50 text-pink-500'}`}>{res.allowSns ? `#${responses.length - i}` : <Lucide name="lock" size={12} />}</div><div className="text-[10px] text-slate-500 font-bold shrink-0">{formatDateTime(res.createdAt)}</div>{!res.allowSns && <span className="text-[8px] font-black text-pink-400 uppercase tracking-tighter shrink-0 border border-pink-100 px-1.5 py-0.5 rounded-full">SNS不可</span>}</div><button onClick={e => { e.stopPropagation(); onToggleLike(res.id); }} className={`icon-btn-circle !w-9 !h-9 !min-w-9 transition-all ${res.liked ? 'bg-pink-50 text-pink-500' : 'text-slate-300'}`}><Lucide name="heart" size={18} fill={res.liked ? "currentColor" : "none"} /></button></div><p className="font-bold text-slate-800 italic px-1 text-sm">"{res.answer}"</p></div>
+                        <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => (
+                            <div key={res.id} onClick={() => onNavigate('share', survey, i)} className={`bg-white border-visible p-4.5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}><div className="flex items-center justify-between"><div className="flex items-center gap-2.5"><div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-[10px] shrink-0 ${res.allowSns ? 'bg-indigo-50 text-indigo-500' : 'bg-pink-50 text-pink-500'}`}>{res.allowSns ? `#${responses.length - i}` : <Lucide name="lock" size={12} />}</div><div className="text-[10px] text-slate-500 font-bold shrink-0">{formatDateTime(res.createdAt)}</div>{!res.allowSns && <span className="text-[8px] font-black text-pink-400 uppercase tracking-tighter shrink-0 border border-pink-100 px-1.5 py-0.5 rounded-full">SNS不可</span>}</div><button onClick={e => { e.stopPropagation(); onToggleLike(res.id); }} className={`btn-circle !w-9 !h-9 !min-w-9 !min-h-9 transition-all ${res.liked ? 'bg-pink-50 text-pink-500' : 'text-slate-300'}`}><Lucide name="heart" size={18} fill={res.liked ? "currentColor" : "none"} /></button></div><p className="font-bold text-slate-800 italic px-1 text-sm">"{res.answer}"</p></div>
                         ))}</div>
                     </section>
                     <ConfirmModal isOpen={showDeleteConfirm} title="アンケートの削除" message="アンケートとすべての回答が完全に削除されます。よろしいですか？" confirmText="削除する" cancelText="キャンセル" isDanger={true} onConfirm={() => { setShowDeleteConfirm(false); onDelete(survey.id); }} onCancel={() => setShowDeleteConfirm(false)} />
@@ -478,18 +467,26 @@
             );
         }
 
-        function RespondView({ survey, onSubmit, onBack, isSelf }) {
+        function RespondView({ survey, onSubmit, onBack, isPreview }) {
             const [answer, setAnswer] = useState('');
             const [allowSns, setAllowSns] = useState(true);
             const [submitted, setSubmitted] = useState(false);
-            if (!survey) return null;
-            if (submitted) return (<div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-4 animate-in zoom-in-95 duration-500"><div className="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-[1.5rem] flex items-center justify-center shadow-lg mb-6"><Lucide name="check-circle-2" size={32} /></div><h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">回答ありがとうございました</h2><p className="text-slate-400 text-xs font-bold mb-10">あなたの想いは確かに届けられました。</p>{isSelf && <button onClick={onBack} className="bg-indigo-600 text-white px-10 py-4 h-14 rounded-full font-black text-sm shadow-xl active:scale-95">管理画面に戻る</button>}</div>);
+            const handleSubmitClick = async () => {
+                if (!answer) return;
+                await onSubmit(answer, allowSns);
+                setSubmitted(true);
+            };
+            if (submitted) return (<div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-4 animate-in zoom-in-95 duration-500"><div className="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-3xl flex items-center justify-center shadow-lg mb-6"><Lucide name="check-circle-2" size={32} /></div><h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">回答ありがとうございました</h2><p className="text-slate-400 text-xs font-bold mb-10">あなたの想いは確かに届けられました。</p>{isPreview ? <button onClick={onBack} className="bg-indigo-600 text-white px-10 py-4 h-14 rounded-full font-black text-sm shadow-xl active:scale-95">プレビューを終了</button> : <button onClick={() => window.location.reload()} className="bg-slate-100 text-slate-500 px-10 py-4 rounded-full font-black text-sm hover:bg-slate-200 transition-all">終了する</button>}</div>);
             return (
                 <div className="animate-in slide-in-from-bottom-8 duration-600 space-y-6">
-                    <header className="text-center space-y-4"><div className="w-12 h-1.5 bg-indigo-100 mx-auto rounded-full opacity-40" /><h1 className="text-2xl font-black text-slate-900 tracking-tight">{survey.title}</h1><div className="inline-flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100"><Lucide name="shield-check" size={12} className="text-indigo-500" /><p className="text-[10px] font-black text-indigo-600 tracking-tight">回答は匿名です。誰にもわかりません。</p></div></header>
+                    <header className="flex justify-center items-center relative py-2">
+                        {isPreview && <button onClick={onBack} className="absolute left-0 btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="x" size={18} /></button>}
+                        <h1 className="text-xl font-black text-slate-900 tracking-tight text-center w-full">{survey.title}</h1>
+                    </header>
+                    <div className="flex justify-center"><div className="inline-flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100"><Lucide name="shield-check" size={12} className="text-indigo-500" /><p className="text-[10px] font-black text-indigo-600 tracking-tight text-center">回答は匿名です。誰にもわかりません。</p></div></div>
                     <div className="space-y-6 text-center"><p className="text-xl font-black text-slate-800 italic px-4 leading-snug">"{survey.question}"</p><div className="relative"><textarea placeholder="ここに答えを書いてください..." className="w-full bg-transparent text-lg font-bold focus:outline-none transition-all resize-none min-h-[280px] leading-relaxed py-4 text-center placeholder:text-slate-300" value={answer} maxLength={MAX_ANSWER_LENGTH} onChange={e => setAnswer(e.target.value)} /><div className={`text-[10px] font-black tracking-widest mt-2 ${answer.length >= MAX_ANSWER_LENGTH ? 'text-pink-500' : 'text-slate-400'}`}>{answer.length} / {MAX_ANSWER_LENGTH}</div></div>
                         <div className="space-y-6 flex flex-col items-center pt-2"><button onClick={() => setAllowSns(!allowSns)} className="flex items-center gap-2.5 py-1 select-none group"><div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all shrink-0 ${allowSns ? 'bg-indigo-500 border-indigo-500 shadow-md' : 'border-slate-300'}`}>{allowSns && <Lucide name="check" size={14} className="text-white" />}</div><span className={`text-[11px] font-black transition-colors ${allowSns ? 'text-indigo-600' : 'text-slate-500'}`}>SNS等への掲載を許可する</span></button>
-                            <button onClick={async () => { if(!answer)return; await onSubmit(answer, allowSns); setSubmitted(true); }} disabled={!answer} className={`px-12 py-4 h-14 rounded-full font-black text-lg text-white shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all ${!answer ? 'bg-slate-200' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 border border-indigo-400'}`}>想いを届ける <Lucide name="send" size={20} /></button>
+                            <button onClick={handleSubmitClick} disabled={!answer} className={`px-12 py-4 h-14 rounded-full font-black text-lg text-white shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all ${!answer ? 'bg-slate-200 shadow-none' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 border border-indigo-400'}`}>想いを届ける <Lucide name="send" size={20} /></button>
                         </div>
                     </div>
                 </div>
@@ -503,19 +500,26 @@
             const response = responses[index];
             const activeSurvey = survey || surveys.find(s => s.id === response.surveyId);
             const theme = GRADIENTS.find(g => g.id === activeSurvey?.gradientId) || GRADIENTS[0];
-            const getFontSize = (text) => text.length < 20 ? 'text-4xl' : text.length < 40 ? 'text-3xl' : text.length < 80 ? 'text-2xl' : 'text-xl';
+            const startFullscreen = (e) => { e.stopPropagation(); if (galleryRef.current?.requestFullscreen) galleryRef.current.requestFullscreen(); else if (galleryRef.current?.webkitRequestFullscreen) galleryRef.current.webkitRequestFullscreen(); setIsFullscreen(true); };
             useEffect(() => { const handler = () => { if (!document.fullscreenElement) setIsFullscreen(false); }; document.addEventListener('fullscreenchange', handler); return () => document.removeEventListener('fullscreenchange', handler); }, []);
+            const getFontSize = (text) => text.length < 20 ? 'text-4xl' : text.length < 40 ? 'text-3xl' : text.length < 80 ? 'text-2xl' : 'text-xl';
+            const goPrev = (e) => { e.stopPropagation(); if (index > 0) setIndex(index - 1); };
+            const goNext = (e) => { e.stopPropagation(); if (index < responses.length - 1) setIndex(index + 1); };
             return (
                 <div ref={galleryRef} className={`fixed inset-0 z-[100] bg-white flex flex-col items-center animate-in fade-in duration-300 select-none ${isFullscreen ? 'justify-start' : 'justify-center'}`} onClick={() => isFullscreen && document.exitFullscreen()}>
-                    {!isFullscreen && (<div className="absolute top-6 w-full px-8 flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] z-20"><button onClick={onClose} className="flex items-center gap-1.5 hover:text-slate-900 transition-colors bg-slate-50 px-3.5 py-1.5 rounded-full border-main shrink-0 shadow-sm"><Lucide name="arrow-left" size={14} /> 戻る</button><span className="font-bold shrink-0">{index + 1} / {responses.length}</span></div>)}
+                    {!isFullscreen && (<div className="absolute top-6 w-full px-8 flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] z-20"><button onClick={onClose} className="flex items-center gap-1.5 hover:text-slate-900 transition-colors bg-slate-50 px-3.5 py-1.5 rounded-full border-visible shrink-0 shadow-sm"><Lucide name="arrow-left" size={14} /> 戻る</button><span className="font-bold shrink-0">{index + 1} / {responses.length}</span></div>)}
                     <div key={index} className={`w-full max-w-[420px] ${theme.class} relative overflow-hidden transition-all duration-700 ${isFullscreen ? 'h-full rounded-none' : 'h-[80vh] rounded-[3.2rem] shadow-[0_80px_150px_rgba(99,102,241,0.3)]'}`}>
                         <div className="absolute -top-20 -left-20 w-[300px] h-[300px] bg-white/20 rounded-full blur-[80px]" /><div className="absolute bottom-0 right-0 w-[200px] h-[200px] bg-white/10 rounded-full blur-[60px]" />
                         <div className="relative z-10 flex flex-col h-full px-8 pt-[18%] pb-[25%]"><header className="mb-6 flex-shrink-0 animate-in fade-in slide-in-from-top-4 duration-1000"><div className="text-white/70 text-[10px] font-black uppercase tracking-[0.4em] mb-4 flex items-center gap-2"><span className="w-8 h-[1px] bg-white/40 shrink-0" /> 質問のテーマ</div><div className="space-y-1"><h1 className="text-white text-3xl font-black leading-tight drop-shadow-md">{activeSurvey?.title || "お気に入り"}</h1><span className="text-xs font-bold text-white/80 opacity-70">by Suze</span></div></header>
-                            <div className="flex-1 flex flex-col justify-center animate-in fade-in zoom-in-95 duration-1000"><div className="bg-white/10 backdrop-blur-3xl border border-white/25 px-6 py-10 rounded-[3.2rem] shadow-2xl relative w-full flex flex-col justify-center min-h-[360px]">{!response.allowSns && <div className="absolute top-4 left-6 flex items-center gap-1.5 px-3 py-1 bg-pink-500/30 backdrop-blur-md rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shrink-0 shadow-sm z-20"><Lucide name="lock" size={10} /> SNS掲載不可</div>}
-                                <div className="space-y-8 mt-2">{activeSurvey && <div className="text-white/95 text-sm font-bold flex items-start gap-3 px-1"><span className="w-[3px] h-5 bg-white/80 rounded-full flex-shrink-0 mt-0.5" />{activeSurvey.question}</div>}<div className={`text-white font-bold italic drop-shadow-md break-words px-1 ${getFontSize(response.answer)}`} style={{ lineHeight: '1.5' }}>"{response.answer}"</div></div></div></div>
+                            <div className="flex-1 flex flex-col justify-center animate-in fade-in zoom-in-95 duration-1000"><div className="bg-white/10 backdrop-blur-3xl border border-white/25 px-6 py-10 rounded-[3.2rem] shadow-2xl relative w-full flex flex-col justify-center min-h-[360px]">
+                                <div className="space-y-8 mt-2">
+                                    {activeSurvey && <div className="text-white/95 text-sm font-bold flex items-start gap-3 px-1"><span className="w-[3px] h-5 bg-white/80 rounded-full flex-shrink-0 mt-0.5" />{activeSurvey.question}</div>}<div className={`text-white font-bold italic drop-shadow-md break-words px-1 ${getFontSize(response.answer)}`} style={{ lineHeight: '1.5' }}>"{response.answer}"</div>
+                                </div>
+                                {!response.allowSns && <div className="absolute -top-3 -right-3 flex items-center gap-1.5 px-3 py-1 bg-pink-500/80 backdrop-blur-md rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shadow-lg z-20"><Lucide name="lock" size={10} /> SNS掲載不可</div>}
+                            </div></div>
                             <div className="absolute bottom-6 left-0 w-full text-center pointer-events-none opacity-40 text-white text-[9px] font-black uppercase tracking-[0.4em]">coelog gallery</div></div>
                     </div>
-                    {!isFullscreen && (<div className="mt-8 flex items-center gap-5 animate-in slide-in-from-bottom-4 duration-500"><button onClick={(e) => { e.stopPropagation(); if(index>0)setIndex(index-1); }} disabled={index === 0} className={`icon-btn-circle transition-all shrink-0 ${index === 0 ? 'opacity-10' : 'text-indigo-600 bg-white border-main shadow-sm active:scale-90'}`}><Lucide name="chevron-left" size={24} /></button><button onClick={(e) => { e.stopPropagation(); if (galleryRef.current?.requestFullscreen) galleryRef.current.requestFullscreen(); else if (galleryRef.current?.webkitRequestFullscreen) galleryRef.current.webkitRequestFullscreen(); setIsFullscreen(true); }} className="bg-indigo-600 text-white px-7 h-12 rounded-full font-black text-sm shadow-xl active:scale-95 border border-indigo-400 flex items-center gap-2 shrink-0"><Lucide name="maximize-2" size={16} /> 全画面で撮影</button><button onClick={(e) => { e.stopPropagation(); if(index < responses.length-1)setIndex(index+1); }} disabled={index === responses.length - 1} className={`icon-btn-circle transition-all shrink-0 ${index === responses.length - 1 ? 'opacity-10' : 'text-indigo-600 bg-white border-main shadow-sm active:scale-90'}`}><Lucide name="chevron-right" size={24} /></button></div>)}
+                    {!isFullscreen && (<div className="mt-8 flex items-center gap-5 animate-in slide-in-from-bottom-4 duration-500"><button onClick={(e) => { e.stopPropagation(); if(index>0)setIndex(index-1); }} disabled={index === 0} className={`btn-circle transition-all shrink-0 ${index === 0 ? 'opacity-10' : 'text-indigo-600 bg-white border-visible shadow-sm active:scale-90'}`}><Lucide name="chevron-left" size={24} /></button><button onClick={(e) => { e.stopPropagation(); if (galleryRef.current?.requestFullscreen) galleryRef.current.requestFullscreen(); else if (galleryRef.current?.webkitRequestFullscreen) galleryRef.current.webkitRequestFullscreen(); setIsFullscreen(true); }} className="bg-indigo-600 text-white px-7 h-12 rounded-full font-black text-sm shadow-xl active:scale-95 border border-indigo-400 flex items-center gap-2 shrink-0"><Lucide name="maximize-2" size={16} /> 全画面で撮影</button><button onClick={(e) => { e.stopPropagation(); if(index < responses.length-1)setIndex(index+1); }} disabled={index === responses.length - 1} className={`btn-circle transition-all shrink-0 ${index === responses.length - 1 ? 'opacity-10' : 'text-indigo-600 bg-white border-visible shadow-sm active:scale-90'}`}><Lucide name="chevron-right" size={24} /></button></div>)}
                 </div>
             );
         }
