@@ -1,589 +1,572 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.3">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
-    span.s1 {font-kerning: none}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>coelog</title>
+    
+    <!-- CSS & Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- React & Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Firebase SDK (Compat versions) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body { 
+            font-family: 'Noto Sans JP', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+            background-color: #fcfdff;
+            color: #1e293b;
+        }
+        .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        
+        .icon-btn-circle {
+            width: 44px !important;
+            height: 44px !important;
+            min-width: 44px !important;
+            min-height: 44px !important;
+            max-width: 44px !important;
+            max-height: 44px !important;
+            display: flex !important; 
+            align-items: center !important; 
+            justify-content: center !important; 
+            flex-shrink: 0 !important; 
+            border-radius: 9999px !important;
+            padding: 0 !important;
+        }
+
+        .border-visible { border: 1.5px solid #cbd5e1 !important; }
+        .border-visible:focus-within { border-color: #818cf8 !important; }
+
+        .google-btn {
+            background-color: white;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .rounded-card { border-radius: 1rem !important; }
+        
+        /* カード内スクロールバーのカスタマイズ */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
 </head>
-<body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="ja"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;coelog&lt;/title&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;!-- CSS &amp; Fonts --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&amp;display=swap" rel="stylesheet"&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;!-- React &amp; Babel --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://unpkg.com/react@18/umd/react.production.min.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://unpkg.com/@babel/standalone/babel.min.js"&gt;&lt;/script&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;!-- Lucide Icons --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://unpkg.com/lucide@latest"&gt;&lt;/script&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;!-- Firebase SDK (Compat versions) --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"&gt;&lt;/script&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;style&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>body {<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-family: 'Noto Sans JP', sans-serif;<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>-webkit-tap-highlight-color: transparent;<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #fcfdff;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #1e293b;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.icon-btn-circle {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 44px !important;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 44px !important;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>min-width: 44px !important;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>min-height: 44px !important;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>max-width: 44px !important;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>max-height: 44px !important;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex !important;<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>align-items: center !important;<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>justify-content: center !important;<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>flex-shrink: 0 !important;<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 9999px !important;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 0 !important;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.border-visible { border: 1.5px solid #cbd5e1 !important; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.border-visible:focus-within { border-color: #818cf8 !important; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.google-btn {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background-color: white;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 1px solid #cbd5e1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #334155;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-weight: 700;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 10px 20px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 9999px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>gap: 10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 14px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: 0 2px 4px rgba(0,0,0,0.05);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.rounded-card { border-radius: 1rem !important; }</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* カード内スクロールバーのカスタマイズ */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.custom-scrollbar::-webkit-scrollbar { width: 4px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.pb-safe { padding-bottom: env(safe-area-inset-bottom); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body class="antialiased"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="root"&gt;&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script type="text/babel"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const { useState, useEffect, useMemo, useRef } = React;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- Firebase Configuration ---</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const getFirebaseConfig = () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (typeof __firebase_config !== 'undefined') return JSON.parse(__firebase_config);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>apiKey: "AIzaSyA50AwAS5bqerWQsCJvGVAGF44kxHq3QBw",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>authDomain: "coelog-718ad.firebaseapp.com",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>projectId: "coelog-718ad",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>storageBucket: "coelog-718ad.firebasestorage.app",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>messagingSenderId: "862928608681",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>appId: "1:862928608681:web:21c39e011c888727a838b8"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const config = getFirebaseConfig();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (!firebase.apps.length) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>firebase.initializeApp(config);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const auth = firebase.auth();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const db = firebase.firestore();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const appId = typeof __app_id !== 'undefined' ? __app_id : 'coelog-718ad';</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const MAX_ANSWER_LENGTH = 140;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const GRADIENTS = [</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>{ id: 'purple', name: 'パープル', class: 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500' },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>{ id: 'sunset', name: 'サンセット', class: 'bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600' },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>{ id: 'ocean', name: 'オーシャン', class: 'bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600' },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>{ id: 'nature', name: 'ネイチャー', class: 'bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600' },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>{ id: 'midnight', name: 'ミッドナイト', class: 'bg-gradient-to-br from-indigo-900 via-slate-800 to-gray-900' },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>];</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const formatDateTime = (ts) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (!ts) return '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const d = ts.toDate ? ts.toDate() : new Date(ts);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const Lucide = ({ name, size = 20, className = "", fill = "none", strokeWidth = 2.5 }) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const iconRef = useRef(null);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (iconRef.current) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>iconRef.current.innerHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const icon = document.createElement('i');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>icon.setAttribute('data-lucide', name);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>icon.setAttribute('width', size);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>icon.setAttribute('height', size);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (fill !== "none") icon.setAttribute('fill', fill);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>icon.setAttribute('stroke-width', strokeWidth);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>iconRef.current.appendChild(icon);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>lucide.createIcons();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}, [name, size, fill, strokeWidth]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return &lt;span ref={iconRef} className={`inline-flex items-center justify-center shrink-0 aspect-square ${className}`}&gt;&lt;/span&gt;;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function ConfirmModal({ isOpen, title, message, confirmText, cancelText, onConfirm, onCancel, isDanger = false }) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (!isOpen) return null;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div className="fixed inset-0 z-[5000] flex items-center justify-center p-6"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onCancel} /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="relative bg-white w-full max-w-[320px] rounded-3xl p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="flex flex-col items-center text-center space-y-3"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className={`p-3 rounded-2xl ${isDanger ? 'bg-pink-50 text-pink-500' : 'bg-indigo-50 text-indigo-500'}`}&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;Lucide name="alert-circle" size={24} /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;h3 className="font-black text-lg text-slate-900"&gt;{title}&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;p className="text-sm text-slate-500 font-bold leading-relaxed"&gt;{message}&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="flex flex-col gap-2"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button onClick={onConfirm} className={`w-full py-3.5 rounded-2xl font-black text-sm transition-all active:scale-95 ${isDanger ? 'bg-pink-500 text-white shadow-lg' : 'bg-indigo-500 text-white shadow-lg'}`}&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>{confirmText}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button onClick={onCancel} className="w-full py-3.5 rounded-2xl font-black text-sm text-slate-400"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>{cancelText}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function App() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [user, setUser] = useState(null);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [view, setView] = useState('loading');<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [surveys, setSurveys] = useState([]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [responses, setResponses] = useState([]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [currentSurvey, setCurrentSurvey] = useState(null);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [selectedResponseIndex, setSelectedResponseIndex] = useState(0);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [notification, setNotification] = useState(null);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [isPreviewMode, setIsPreviewMode] = useState(false);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const initAuth = async () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const params = new URLSearchParams(window.location.search);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const surveyId = params.get('id');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>auth.onAuthStateChanged(async (u) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>if (u) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>setUser(u);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>if (surveyId) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>const doc = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys').doc(surveyId).get();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>if (doc.exists) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>setCurrentSurvey({ id: doc.id, ...doc.data() });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>setView('respond');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>setView('home');<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>setView('home');<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>if (surveyId) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>await auth.signInAnonymously();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>setView('login');<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>initAuth();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}, []);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!user) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const path = db.collection('artifacts').doc(appId).collection('public').doc('data');</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const unsubSurveys = path.collection('surveys').onSnapshot(snap =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const data = snap.docs.map(d =&gt; ({ id: d.id, ...d.data() }));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>setSurveys(data.filter(s =&gt; s.creatorId === user.uid).sort((a,b) =&gt; (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}, e =&gt; console.error(e));</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const unsubResponses = path.collection('responses').onSnapshot(snap =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>setResponses(snap.docs.map(d =&gt; ({ id: d.id, ...d.data() })));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}, e =&gt; console.error(e));</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return () =&gt; { unsubSurveys(); unsubResponses(); };</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}, [user, appId]);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const showToast = (msg) =&gt; { setNotification(msg); setTimeout(() =&gt; setNotification(null), 3500); };</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const handleLoginGoogle = async () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const provider = new firebase.auth.GoogleAuthProvider();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>try {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>await auth.signInWithPopup(provider);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>showToast("ログインしました");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>setView('home');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} catch (e) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>console.error(e);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>showToast("ログイン失敗");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const handleLogout = async () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>await auth.signOut();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setShowLogoutConfirm(false);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setView('login');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>showToast("ログアウトしました");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const handleCopyURL = () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!currentSurvey) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const url = window.location.origin + window.location.pathname + "?id=" + currentSurvey.id;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const textArea = document.createElement("textarea");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>textArea.value = url;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>textArea.style.position = "fixed";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>textArea.style.left = "-9999px";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>document.body.appendChild(textArea);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>textArea.select();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>try {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>document.execCommand('copy');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>showToast("回答用URLをコピーしました");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} catch (err) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>showToast("コピー失敗しました");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>document.body.removeChild(textArea);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const handleSaveSurvey = async (surveyData) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!user) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>try {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const { id, ...data } = surveyData;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const cleanData = {};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>Object.keys(data).forEach(key =&gt; { if(data[key] !== undefined) cleanData[key] = data[key]; });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const ref = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys');</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (id) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>await ref.doc(id).update(cleanData);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>showToast("更新しました");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>setCurrentSurvey({ id, ...cleanData });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>setView('stats');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>await ref.add({ ...cleanData, creatorId: user.uid, createdAt: firebase.firestore.Timestamp.now() });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>showToast("作成しました");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>setView('home');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} catch (e) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>showToast("保存エラー: " + e.message);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const handleAddResponse = async (answer, allowSns) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>try {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('responses').add({</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>surveyId: currentSurvey.id, answer, allowSns, liked: false, createdAt: firebase.firestore.Timestamp.now()</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>showToast("届けました");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} catch (e) { showToast("送信失敗"); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const toggleLike = async (id) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const res = responses.find(r =&gt; r.id === id);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!res) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('responses').doc(id).update({ liked: !res.liked });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>showToast(!res.liked ? "お気に入りに追加" : "お気に入り解除");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const handleDeleteSurvey = async (id) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>try {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys').doc(id).delete();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>showToast("削除しました");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>setView('home');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} catch (e) { showToast("削除失敗"); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const currentResponses = useMemo(() =&gt; responses.filter(r =&gt; r.surveyId === currentSurvey?.id).sort((a,b) =&gt; (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)), [responses, currentSurvey]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const favoriteResponses = useMemo(() =&gt; responses.filter(r =&gt; r.liked), [responses]);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const navigate = (v, d = null) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setCurrentSurvey(d);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setView(v);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>window.scrollTo(0,0);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (view === 'loading') return &lt;div className="min-h-screen flex items-center justify-center font-black text-indigo-400 animate-pulse"&gt;coelog...&lt;/div&gt;;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div className="max-w-md mx-auto px-5 py-6 relative min-h-screen overflow-hidden"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{view === 'login' &amp;&amp; &lt;LoginView onLoginGoogle={handleLoginGoogle} /&gt;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{view === 'home' &amp;&amp; &lt;HomeView surveys={surveys} user={user} onLogoutRequest={() =&gt; setShowLogoutConfirm(true)} onNavigate={navigate} /&gt;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{view === 'favorites' &amp;&amp; &lt;FavoritesView responses={favoriteResponses} surveys={surveys} onNavigate={(v, d, i) =&gt; { setSelectedResponseIndex(i); navigate(v, d); }} onBack={() =&gt; setView('home')} /&gt;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{(view === 'create' || view === 'edit') &amp;&amp; &lt;SurveyFormView initialData={view === 'edit' ? currentSurvey : null} onSave={handleSaveSurvey} onBack={() =&gt; setView(view === 'edit' ? 'stats' : 'home')} /&gt;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{view === 'respond' &amp;&amp; &lt;RespondView survey={currentSurvey} onSubmit={handleAddResponse} onBack={() =&gt; setView('stats')} /&gt;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{view === 'stats' &amp;&amp; &lt;StatsView survey={currentSurvey} responses={currentResponses} onNavigate={(v, d, i) =&gt; { setSelectedResponseIndex(i); navigate(v, d); }} onBack={() =&gt; setView('home')} onDelete={handleDeleteSurvey} onToggleLike={toggleLike} onCopy={handleCopyURL} /&gt;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{view === 'share' &amp;&amp; &lt;ResponseGallery responses={currentSurvey ? currentResponses : favoriteResponses} initialIndex={selectedResponseIndex} survey={currentSurvey} surveys={surveys} onClose={() =&gt; setView(currentSurvey ? 'stats' : 'favorites')} /&gt;}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{notification &amp;&amp; (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="fixed top-6 left-1/2 -translate-x-1/2 z-[3000] animate-in fade-in slide-in-from-top-2"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="bg-slate-900/95 backdrop-blur-md text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-xl flex items-center gap-2 border border-white/10"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;Lucide name="check-circle-2" size={14} className="text-emerald-400" /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>{notification}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>)}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;ConfirmModal<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>isOpen={showLogoutConfirm}<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>title="ログアウト"<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>message="ログアウトしますか？"<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>confirmText="ログアウト"<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>cancelText="キャンセル"<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>isDanger={true}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>onConfirm={handleLogout}<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>onCancel={() =&gt; setShowLogoutConfirm(false)}<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>/&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{['home', 'stats', 'favorites'].includes(view) &amp;&amp; (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-auto bg-white/95 border border-slate-300 shadow-[0_15px_40px_rgba(0,0,0,0.08)] rounded-full flex items-center p-2 z-[100]"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button onClick={() =&gt; navigate('home')} className={`icon-btn-circle transition-all ${view === 'home' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;Lucide name="layout" size={20} /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="w-4 shrink-0" /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button onClick={() =&gt; navigate('create')} className={`icon-btn-circle transition-all ${view === 'create' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;Lucide name="plus" size={20} /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="w-4 shrink-0" /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button onClick={() =&gt; navigate('favorites')} className={`icon-btn-circle transition-all ${view === 'favorites' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;Lucide name="heart" size={20} fill={view === 'favorites' ? "currentColor" : "none"} /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/nav&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>)}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- Sub-View Components ---</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function LoginView({ onLoginGoogle }) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-10 animate-in fade-in duration-700"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="text-center space-y-4"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="w-20 h-20 rounded-[2rem] bg-gradient-to-tr from-indigo-500 to-purple-400 flex items-center justify-center text-white shadow-2xl mx-auto mb-6 animate-pulse-slow"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;Lucide name="sparkles" size={40} /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;h1 className="text-4xl font-black tracking-tighter text-slate-900"&gt;coelog&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="w-full max-w-xs space-y-4"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;button onClick={onLoginGoogle} className="google-btn w-full justify-center py-4 text-base active:scale-95 transition-all"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;Lucide name="mail" size={20} /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>Googleで始める</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function HomeView({ surveys, user, onLogoutRequest, onNavigate }) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div className="space-y-6 animate-in fade-in duration-500"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;header className="flex items-center justify-between py-1 px-1"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;h1 className="text-xl font-black tracking-tighter text-slate-900"&gt;coelog&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;button onClick={onLogoutRequest} className="icon-btn-circle text-slate-400 bg-white shadow-sm border-visible active:scale-90 transition-all"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                             </span>&lt;Lucide name="log-out" size={18} /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/header&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="grid gap-4 pb-24"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>{surveys.length === 0 ? (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button onClick={() =&gt; onNavigate('create')} className="w-full bg-white border-2 border-dashed border-slate-300 rounded-card py-12 text-center space-y-3"&gt;&lt;Lucide name="plus" size={24} className="mx-auto text-indigo-200" /&gt;&lt;p className="text-slate-500 text-xs font-bold"&gt;アンケートを作成&lt;/p&gt;&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>) : surveys.map(s =&gt; (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button key={s.id} onClick={() =&gt; onNavigate('stats', s)} className="bg-white border-visible p-5 rounded-card text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98]"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="space-y-3"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div className="flex justify-between items-center text-slate-400 font-black text-[9px]"&gt;&lt;div className="p-1.5 bg-indigo-50 text-indigo-500 rounded-xl"&gt;&lt;Lucide name="message-circle" size={14} /&gt;&lt;/div&gt;&lt;span className="flex items-center gap-1"&gt;&lt;Lucide name="clock" size={10} /&gt; {formatDateTime(s.createdAt)}&lt;/span&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div&gt;&lt;h3 className="font-bold text-lg text-slate-800 leading-tight"&gt;{s.title}&lt;/h3&gt;&lt;p className="text-xs text-slate-400 line-clamp-1 italic mt-1"&gt;"{s.question}"&lt;/p&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>))}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function FavoritesView({ responses, surveys, onNavigate, onBack }) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div className="space-y-6 animate-in fade-in duration-500"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;header className="flex flex-col py-1 px-1"&gt;&lt;h1 className="text-2xl font-black text-slate-900"&gt;お気に入り&lt;/h1&gt;&lt;p className="text-slate-400 text-xs font-bold"&gt;心に残った大切な声&lt;/p&gt;&lt;/header&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="grid gap-3 pb-24"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>{responses.length === 0 ? &lt;div className="bg-white/40 border-2 border-dashed border-slate-300 rounded-card py-16 text-center text-slate-300 text-xs font-bold italic"&gt;まだありません&lt;/div&gt; : responses.map((res, i) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>const s = surveys.find(sur =&gt; sur.id === res.surveyId);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;button key={res.id} onClick={() =&gt; onNavigate('share', null, i)} className="bg-white border-visible p-5 rounded-card text-left shadow-sm hover:shadow-indigo-50 transition-all active:scale-[0.98]"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div className="space-y-2"&gt;&lt;div className="flex justify-between text-[9px] font-black text-indigo-400 uppercase tracking-widest"&gt;&lt;span&gt;{s?.title || "テーマ不明"}&lt;/span&gt;&lt;span className="text-slate-400"&gt;{formatDateTime(res.createdAt)}&lt;/span&gt;&lt;/div&gt;&lt;p className="font-bold text-slate-700 leading-relaxed italic text-sm line-clamp-3"&gt;"{res.answer}"&lt;/p&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>})}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function SurveyFormView({ initialData, onSave, onBack }) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [title, setTitle] = useState(initialData?.title || '');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [question, setQuestion] = useState(initialData?.question || '');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [gradientId, setGradientId] = useState(initialData?.gradientId || 'purple');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [showConfirm, setShowConfirm] = useState(false);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const isEdit = !!initialData;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const hasChanges = useMemo(() =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const initialTitle = initialData?.title || '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const initialQuestion = initialData?.question || '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const initialGradient = initialData?.gradientId || 'purple';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return title !== initialTitle || question !== initialQuestion || gradientId !== initialGradient;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}, [title, question, gradientId, initialData]);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const handleBack = () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (hasChanges) setShowConfirm(true);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>else onBack();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div className="space-y-4 animate-in slide-in-from-right-4 duration-400 pb-20"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;header className="flex items-center justify-between py-1"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;button onClick={handleBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"&gt;&lt;Lucide name="arrow-left" size={18} /&gt;&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;h2 className="font-black text-sm text-slate-900"&gt;{isEdit ? '内容を編集' : '新しく作る'}&lt;/h2&gt;&lt;div className="w-11 h-11 shrink-0" /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/header&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="bg-white border-visible rounded-card p-6 shadow-sm space-y-6"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="space-y-2"&gt;&lt;label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1"&gt;アンケート名&lt;/label&gt;&lt;input type="text" placeholder="例：次回のテーマについて" className="w-full bg-transparent border-b-2 border-slate-200 focus:border-indigo-400 outline-none py-1.5 text-xl font-bold transition-all placeholder:text-slate-300" value={title} onChange={e =&gt; setTitle(e.target.value)} /&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="space-y-2"&gt;&lt;label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1"&gt;質問の内容&lt;/label&gt;&lt;textarea placeholder="聞きたいことをひとつだけ" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold focus:bg-white focus:border-indigo-400 outline-none transition-all resize-none h-32" value={question} onChange={e =&gt; setQuestion(e.target.value)} /&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="space-y-3 pt-1"&gt;&lt;label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1"&gt;デザイン&lt;/label&gt;&lt;div className="flex flex-wrap gap-3 px-1"&gt;{GRADIENTS.map(g =&gt; (&lt;button key={g.id} onClick={() =&gt; setGradientId(g.id)} className={`w-9 h-9 rounded-full transition-all relative ${g.class} ${gradientId === g.id ? 'scale-110 ring-4 ring-indigo-50 shadow-md' : 'opacity-60'}`}&gt;{gradientId === g.id &amp;&amp; &lt;Lucide name="check" size={14} className="text-white mx-auto drop-shadow-md" /&gt;}&lt;/button&gt;))}&lt;/div&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="flex flex-col items-center gap-4 pt-4"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;button onClick={() =&gt; onSave({ id: initialData?.id, title, question, gradientId })} disabled={!title || !question} className={`px-12 py-4 h-14 rounded-full font-black text-lg text-white shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all ${!title || !question ? 'bg-slate-300 shadow-none' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 border border-indigo-400'}`}&gt;{isEdit ? '保存する' : '公開する'} &lt;Lucide name="send" size={20} /&gt;&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;button onClick={onBack} className="text-slate-500 font-bold text-sm hover:text-slate-800 transition-colors py-2 px-6"&gt;キャンセル&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;ConfirmModal isOpen={showConfirm} title="確認" message="入力した内容は保存されませんが、よろしいですか？" confirmText="破棄して戻る" cancelText="続ける" onConfirm={onBack} onCancel={() =&gt; setShowConfirm(false)} /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function StatsView({ survey, responses, onNavigate, onBack, onDelete, onToggleLike, onCopy }) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const theme = GRADIENTS.find(g =&gt; g.id === survey?.gradientId) || GRADIENTS[0];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div className="space-y-6 animate-in slide-in-from-right-4 duration-400 pb-24"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;header className="flex items-center justify-between py-1"&gt;&lt;button onClick={onBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"&gt;&lt;Lucide name="arrow-left" size={18} /&gt;&lt;/button&gt;&lt;h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4"&gt;{survey.title}&lt;/h2&gt;&lt;button onClick={() =&gt; onNavigate('edit', survey)} className="icon-btn-circle text-indigo-600 bg-white shadow-sm border-visible border-indigo-200 active:scale-90 transition-all"&gt;&lt;Lucide name="edit-3" size={18} /&gt;&lt;/button&gt;&lt;/header&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden`}&gt;&lt;div className="space-y-0.5"&gt;&lt;span className="text-white/80 text-[10px] font-black uppercase tracking-widest"&gt;回答数&lt;/span&gt;&lt;div className="text-6xl font-black tracking-tighter tabular-nums"&gt;{responses.length}&lt;/div&gt;&lt;/div&gt;&lt;div className="grid grid-cols-2 gap-2.5 pt-1"&gt;&lt;button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"&gt;&lt;Lucide name="copy" size={14} /&gt; URLコピー&lt;/button&gt;&lt;button onClick={() =&gt; onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"&gt;&lt;Lucide name="eye" size={14} /&gt; プレビュー&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;section className="space-y-4"&gt;&lt;div className="flex justify-between items-center px-2 text-[10px] font-black text-slate-500 uppercase tracking-widest"&gt;&lt;h3&gt;最近の回答&lt;/h3&gt;&lt;button onClick={() =&gt; setShowDeleteConfirm(true)} className="text-pink-500 flex items-center gap-1"&gt;&lt;Lucide name="trash-2" size={11} /&gt; 削除&lt;/button&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="grid gap-3"&gt;{responses.length === 0 ? &lt;div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400"&gt;まだ回答はありません&lt;/div&gt; : responses.map((res, i) =&gt; (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div key={res.id} onClick={() =&gt; onNavigate('share', survey, i)} className={`bg-white border-visible p-5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="flex items-start justify-between"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div className="flex flex-col gap-1.5 w-full pr-2"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;div className="flex items-center gap-2"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;div className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-[9px] shrink-0 ${res.allowSns ? 'bg-indigo-50 text-indigo-500' : 'bg-pink-50 text-pink-500'}`}&gt;{res.allowSns ? `#${responses.length - i}` : &lt;Lucide name="lock" size={10} /&gt;}&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;div className="text-[10px] text-slate-500 font-bold"&gt;{formatDateTime(res.createdAt)}&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>{!res.allowSns &amp;&amp; &lt;span className="text-[8px] font-black text-pink-400 uppercase tracking-tighter shrink-0 border border-pink-100 px-1.5 py-0.5 rounded-full"&gt;SNS不可&lt;/span&gt;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;button onClick={e =&gt; { e.stopPropagation(); onToggleLike(res.id); }} className={`w-8 h-8 flex items-center justify-center rounded-xl transition-all shrink-0 ${res.liked ? 'bg-pink-50 text-pink-500' : 'text-slate-300 hover:bg-slate-50'}`}&gt;&lt;Lucide name="heart" size={18} fill={res.liked ? "currentColor" : "none"} /&gt;&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;p className="font-bold text-slate-800 italic text-sm leading-relaxed break-words"&gt;"{res.answer}"&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>))}&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/section&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;ConfirmModal isOpen={showDeleteConfirm} title="アンケートの削除" message="アンケートとすべての回答が完全に削除されます。よろしいですか？" confirmText="削除する" cancelText="キャンセル" isDanger={true} onConfirm={() =&gt; { setShowDeleteConfirm(false); onDelete(survey.id); }} onCancel={() =&gt; setShowDeleteConfirm(false)} /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function RespondView({ survey, onSubmit, onBack, isPreview }) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [answer, setAnswer] = useState('');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [allowSns, setAllowSns] = useState(true);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [submitted, setSubmitted] = useState(false);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const handleSubmitClick = async () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!answer) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>await onSubmit(answer, allowSns);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setSubmitted(true);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const handleCloseWindow = () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>window.open('about:blank','_self').close();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setTimeout(() =&gt; alert("ブラウザのタブを閉じて終了してください"), 500);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (submitted) return (&lt;div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-4 animate-in zoom-in-95 duration-500"&gt;&lt;div className="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-3xl flex items-center justify-center shadow-lg mb-6"&gt;&lt;Lucide name="check-circle-2" size={32} /&gt;&lt;/div&gt;&lt;h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2"&gt;回答ありがとうございました&lt;/h2&gt;&lt;p className="text-slate-400 text-xs font-bold mb-10"&gt;あなたの想いは確かに届けられました。&lt;/p&gt;{isPreview ? &lt;button onClick={onBack} className="bg-indigo-600 text-white px-10 py-4 h-14 rounded-full font-black text-sm shadow-xl active:scale-95"&gt;プレビューを終了&lt;/button&gt; : &lt;button onClick={handleCloseWindow} className="bg-slate-100 text-slate-500 px-10 py-4 rounded-full font-black text-sm hover:bg-slate-200 transition-all"&gt;終了する&lt;/button&gt;}&lt;/div&gt;);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div className="animate-in slide-in-from-bottom-8 duration-600 space-y-6"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;header className="flex justify-center items-center relative py-2"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>{isPreview &amp;&amp; &lt;button onClick={onBack} className="absolute left-0 icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"&gt;&lt;Lucide name="x" size={18} /&gt;&lt;/button&gt;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;h1 className="text-xl font-black text-slate-900 tracking-tight text-center w-full"&gt;{survey.title}&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/header&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="flex justify-center"&gt;&lt;div className="inline-flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100"&gt;&lt;Lucide name="shield-check" size={12} className="text-indigo-500" /&gt;&lt;p className="text-[10px] font-black text-indigo-600 tracking-tight text-center"&gt;回答は匿名です。誰にもわかりません。&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="space-y-6 text-center"&gt;&lt;p className="text-xl font-black text-slate-800 italic px-4 leading-snug"&gt;"{survey.question}"&lt;/p&gt;&lt;div className="relative"&gt;&lt;textarea placeholder="ここに答えを書いてください..." className="w-full bg-transparent text-lg font-bold focus:outline-none transition-all resize-none min-h-[280px] leading-relaxed py-4 text-center placeholder:text-slate-300" value={answer} maxLength={MAX_ANSWER_LENGTH} onChange={e =&gt; setAnswer(e.target.value)} /&gt;&lt;div className={`text-[10px] font-black tracking-widest mt-2 ${answer.length &gt;= MAX_ANSWER_LENGTH ? 'text-pink-500' : 'text-slate-400'}`}&gt;{answer.length} / {MAX_ANSWER_LENGTH}&lt;/div&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="space-y-6 flex flex-col items-center pt-2"&gt;&lt;button onClick={() =&gt; setAllowSns(!allowSns)} className="flex items-center gap-2.5 py-1 select-none group"&gt;&lt;div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all shrink-0 ${allowSns ? 'bg-indigo-500 border-indigo-500 shadow-md' : 'border-slate-300'}`}&gt;{allowSns &amp;&amp; &lt;Lucide name="check" size={14} className="text-white" /&gt;}&lt;/div&gt;&lt;span className={`text-[11px] font-black transition-colors ${allowSns ? 'text-indigo-600' : 'text-slate-500'}`}&gt;SNS等への掲載を許可する&lt;/span&gt;&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button onClick={handleSubmitClick} disabled={!answer} className={`px-12 py-4 h-14 rounded-full font-black text-lg text-white shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all ${!answer ? 'bg-slate-200 shadow-none' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 border border-indigo-400'}`}&gt;想いを届ける &lt;Lucide name="send" size={20} /&gt;&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function ResponseGallery({ responses, initialIndex, survey, surveys, onClose }) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [index, setIndex] = useState(initialIndex);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const response = responses[index];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const activeSurvey = survey || surveys.find(s =&gt; s.id === response.surveyId);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const theme = GRADIENTS.find(g =&gt; g.id === activeSurvey?.gradientId) || GRADIENTS[0];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const getFontSize = (text) =&gt; text.length &lt; 20 ? 'text-4xl' : text.length &lt; 40 ? 'text-3xl' : text.length &lt; 80 ? 'text-2xl' : 'text-xl';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const goPrev = (e) =&gt; { e.stopPropagation(); if (index &gt; 0) setIndex(index - 1); };</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const goNext = (e) =&gt; { e.stopPropagation(); if (index &lt; responses.length - 1) setIndex(index + 1); };</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// 安全対策: データがない場合は何も表示しないかローディング</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (!response) return null;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div className="fixed inset-0 z-[100] bg-[#fcfdff] flex flex-col h-full w-full"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="px-5 py-4 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-100 z-10 shrink-0"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                         </span>&lt;button onClick={onClose} className="flex items-center gap-2 text-slate-500 font-bold text-sm bg-slate-100 px-4 py-2 rounded-full active:scale-95 transition-all"&gt;&lt;Lucide name="x" size={18} /&gt; 閉じる&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;span className="font-black text-slate-400 text-xs tracking-widest"&gt;{index + 1} / {responses.length}&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="flex-1 overflow-y-auto p-5 flex flex-col items-center justify-center min-h-0"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className={`w-full max-w-sm ${theme.class} rounded-3xl shadow-2xl relative flex flex-col overflow-hidden shrink-0`} style={{ minHeight: '60vh', maxHeight: '80vh' }}&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="absolute -top-20 -left-20 w-[200px] h-[200px] bg-white/20 rounded-full blur-[60px]" /&gt;&lt;div className="absolute bottom-0 right-0 w-[150px] h-[150px] bg-white/10 rounded-full blur-[50px]" /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="relative z-10 flex flex-col h-full p-8"&gt;&lt;div className="mb-6 shrink-0"&gt;&lt;div className="text-white/70 text-[10px] font-black uppercase tracking-[0.2em] mb-2 flex items-center gap-2"&gt;&lt;span className="w-6 h-[1px] bg-white/40 shrink-0" /&gt; THEME&lt;/div&gt;&lt;h1 className="text-white text-2xl font-black leading-tight drop-shadow-md mb-2"&gt;{activeSurvey?.title || "お気に入り"}&lt;/h1&gt;&lt;div className="text-white/80 flex items-center gap-1.5"&gt;&lt;span className="text-[10px] font-bold opacity-70"&gt;by Suze&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="flex-1 flex flex-col justify-center min-h-0"&gt;&lt;div className="bg-white/10 backdrop-blur-md border border-white/20 px-6 py-8 rounded-3xl shadow-inner w-full flex flex-col justify-center overflow-y-auto custom-scrollbar"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>{!response.allowSns &amp;&amp; &lt;div className="mb-4 inline-flex self-start items-center gap-1.5 px-2.5 py-1 bg-pink-500/30 rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shrink-0"&gt;&lt;Lucide name="lock" size={10} /&gt; SNS不可&lt;/div&gt;}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div className="space-y-6"&gt;{activeSurvey &amp;&amp; &lt;div className="text-white/90 text-xs font-bold flex items-start gap-2 leading-relaxed"&gt;&lt;span className="w-1.5 h-1.5 bg-white/80 rounded-full shrink-0 mt-1.5" /&gt;{activeSurvey.question}&lt;/div&gt;}&lt;div className={`text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`} style={{ lineHeight: '1.6' }}&gt;"{response.answer}"&lt;/div&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="mt-6 text-center shrink-0"&gt;&lt;span className="text-white/40 text-[9px] font-black uppercase tracking-[0.3em]"&gt;coelog gallery&lt;/span&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="p-6 bg-white border-t border-slate-100 shrink-0 flex justify-center gap-8 pb-safe"&gt;&lt;button onClick={goPrev} disabled={index === 0} className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${index === 0 ? 'text-slate-200 bg-slate-50' : 'text-slate-600 bg-white border border-slate-200 shadow-lg active:scale-95'}`}&gt;&lt;Lucide name="chevron-left" size={28} /&gt;&lt;/button&gt;&lt;button onClick={goNext} disabled={index === responses.length - 1} className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${index === responses.length - 1 ? 'text-slate-200 bg-slate-50' : 'text-slate-600 bg-white border border-slate-200 shadow-lg active:scale-95'}`}&gt;&lt;Lucide name="chevron-right" size={28} /&gt;&lt;/button&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ReactDOM.createRoot(document.getElementById('root')).render(&lt;App /&gt;);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+<body class="antialiased">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
+
+        // --- Firebase Configuration ---
+        const getFirebaseConfig = () => {
+            if (typeof __firebase_config !== 'undefined') return JSON.parse(__firebase_config);
+            return {
+                apiKey: "AIzaSyA50AwAS5bqerWQsCJvGVAGF44kxHq3QBw",
+                authDomain: "coelog-718ad.firebaseapp.com",
+                projectId: "coelog-718ad",
+                storageBucket: "coelog-718ad.firebasestorage.app",
+                messagingSenderId: "862928608681",
+                appId: "1:862928608681:web:21c39e011c888727a838b8"
+            };
+        };
+
+        const config = getFirebaseConfig();
+        if (!firebase.apps.length) {
+            firebase.initializeApp(config);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'coelog-718ad';
+
+        const MAX_ANSWER_LENGTH = 140;
+        const GRADIENTS = [
+            { id: 'purple', name: 'パープル', class: 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500' },
+            { id: 'sunset', name: 'サンセット', class: 'bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600' },
+            { id: 'ocean', name: 'オーシャン', class: 'bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600' },
+            { id: 'nature', name: 'ネイチャー', class: 'bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600' },
+            { id: 'midnight', name: 'ミッドナイト', class: 'bg-gradient-to-br from-indigo-900 via-slate-800 to-gray-900' },
+        ];
+
+        const formatDateTime = (ts) => {
+            if (!ts) return '';
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        };
+
+        const Lucide = ({ name, size = 20, className = "", fill = "none", strokeWidth = 2.5 }) => {
+            const iconRef = useRef(null);
+            useEffect(() => {
+                if (iconRef.current) {
+                    iconRef.current.innerHTML = '';
+                    const icon = document.createElement('i');
+                    icon.setAttribute('data-lucide', name);
+                    icon.setAttribute('width', size);
+                    icon.setAttribute('height', size);
+                    if (fill !== "none") icon.setAttribute('fill', fill);
+                    icon.setAttribute('stroke-width', strokeWidth);
+                    iconRef.current.appendChild(icon);
+                    lucide.createIcons();
+                }
+            }, [name, size, fill, strokeWidth]);
+            return <span ref={iconRef} className={`inline-flex items-center justify-center shrink-0 aspect-square ${className}`}></span>;
+        };
+
+        function ConfirmModal({ isOpen, title, message, confirmText, cancelText, onConfirm, onCancel, isDanger = false }) {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-[5000] flex items-center justify-center p-6">
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onCancel} />
+                    <div className="relative bg-white w-full max-w-[320px] rounded-3xl p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
+                        <div className="flex flex-col items-center text-center space-y-3">
+                            <div className={`p-3 rounded-2xl ${isDanger ? 'bg-pink-50 text-pink-500' : 'bg-indigo-50 text-indigo-500'}`}>
+                                <Lucide name="alert-circle" size={24} />
+                            </div>
+                            <h3 className="font-black text-lg text-slate-900">{title}</h3>
+                            <p className="text-sm text-slate-500 font-bold leading-relaxed">{message}</p>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <button onClick={onConfirm} className={`w-full py-3.5 rounded-2xl font-black text-sm transition-all active:scale-95 ${isDanger ? 'bg-pink-500 text-white shadow-lg' : 'bg-indigo-500 text-white shadow-lg'}`}>
+                                {confirmText}
+                            </button>
+                            <button onClick={onCancel} className="w-full py-3.5 rounded-2xl font-black text-sm text-slate-400">
+                                {cancelText}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function App() {
+            const [user, setUser] = useState(null);
+            const [view, setView] = useState('loading'); 
+            const [surveys, setSurveys] = useState([]);
+            const [responses, setResponses] = useState([]);
+            const [currentSurvey, setCurrentSurvey] = useState(null);
+            const [selectedResponseIndex, setSelectedResponseIndex] = useState(0);
+            const [notification, setNotification] = useState(null);
+            const [isPreviewMode, setIsPreviewMode] = useState(false);
+            const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+            useEffect(() => {
+                const initAuth = async () => {
+                    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                    
+                    const params = new URLSearchParams(window.location.search);
+                    const surveyId = params.get('id');
+
+                    auth.onAuthStateChanged(async (u) => {
+                        if (u) {
+                            setUser(u);
+                            if (surveyId) {
+                                const doc = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys').doc(surveyId).get();
+                                if (doc.exists) {
+                                    setCurrentSurvey({ id: doc.id, ...doc.data() });
+                                    setView('respond');
+                                } else {
+                                    setView('home'); 
+                                }
+                            } else {
+                                setView('home'); 
+                            }
+                        } else {
+                            if (surveyId) {
+                                await auth.signInAnonymously();
+                            } else {
+                                setView('login'); 
+                            }
+                        }
+                    });
+                };
+                initAuth();
+            }, []);
+
+            useEffect(() => {
+                if (!user) return;
+                const path = db.collection('artifacts').doc(appId).collection('public').doc('data');
+                
+                const unsubSurveys = path.collection('surveys').onSnapshot(snap => {
+                    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    setSurveys(data.filter(s => s.creatorId === user.uid).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+                }, e => console.error(e));
+
+                const unsubResponses = path.collection('responses').onSnapshot(snap => {
+                    setResponses(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+                }, e => console.error(e));
+
+                return () => { unsubSurveys(); unsubResponses(); };
+            }, [user, appId]);
+
+            const showToast = (msg) => { setNotification(msg); setTimeout(() => setNotification(null), 3500); };
+
+            const handleLoginGoogle = async () => {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                try {
+                    await auth.signInWithPopup(provider);
+                    showToast("ログインしました");
+                    setView('home');
+                } catch (e) {
+                    console.error(e);
+                    showToast("ログイン失敗");
+                }
+            };
+
+            const handleLogout = async () => {
+                await auth.signOut();
+                setShowLogoutConfirm(false);
+                setView('login');
+                showToast("ログアウトしました");
+            };
+
+            const handleCopyURL = () => {
+                if (!currentSurvey) return;
+                const url = window.location.origin + window.location.pathname + "?id=" + currentSurvey.id;
+                const textArea = document.createElement("textarea");
+                textArea.value = url;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast("回答用URLをコピーしました");
+                } catch (err) {
+                    showToast("コピー失敗しました");
+                }
+                document.body.removeChild(textArea);
+            };
+
+            const handleSaveSurvey = async (surveyData) => {
+                if (!user) return;
+                try {
+                    const { id, ...data } = surveyData;
+                    const cleanData = {};
+                    Object.keys(data).forEach(key => { if(data[key] !== undefined) cleanData[key] = data[key]; });
+                    const ref = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys');
+                    
+                    if (id) {
+                        await ref.doc(id).update(cleanData);
+                        showToast("更新しました");
+                        setCurrentSurvey({ id, ...cleanData });
+                        setView('stats');
+                    } else {
+                        await ref.add({ ...cleanData, creatorId: user.uid, createdAt: firebase.firestore.Timestamp.now() });
+                        showToast("作成しました");
+                        setView('home');
+                    }
+                } catch (e) {
+                    showToast("保存エラー: " + e.message);
+                }
+            };
+
+            const handleAddResponse = async (answer, allowSns) => {
+                try {
+                    await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('responses').add({
+                        surveyId: currentSurvey.id, answer, allowSns, liked: false, createdAt: firebase.firestore.Timestamp.now()
+                    });
+                    showToast("届けました");
+                } catch (e) { showToast("送信失敗"); }
+            };
+
+            const toggleLike = async (id) => {
+                const res = responses.find(r => r.id === id);
+                if (!res) return;
+                await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('responses').doc(id).update({ liked: !res.liked });
+                showToast(!res.liked ? "お気に入りに追加" : "お気に入り解除");
+            };
+
+            const handleDeleteSurvey = async (id) => {
+                try {
+                    await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys').doc(id).delete();
+                    showToast("削除しました");
+                    setView('home');
+                } catch (e) { showToast("削除失敗"); }
+            };
+
+            const currentResponses = useMemo(() => responses.filter(r => r.surveyId === currentSurvey?.id).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)), [responses, currentSurvey]);
+            const favoriteResponses = useMemo(() => responses.filter(r => r.liked), [responses]);
+
+            const navigate = (v, d = null) => {
+                setCurrentSurvey(d);
+                setView(v);
+                window.scrollTo(0,0);
+            };
+
+            if (view === 'loading') return <div className="min-h-screen flex items-center justify-center font-black text-indigo-400 animate-pulse">coelog...</div>;
+
+            return (
+                <div className="max-w-md mx-auto px-5 py-6 relative min-h-screen overflow-hidden">
+                    {view === 'login' && <LoginView onLoginGoogle={handleLoginGoogle} />}
+                    {view === 'home' && <HomeView surveys={surveys} user={user} onLogoutRequest={() => setShowLogoutConfirm(true)} onNavigate={navigate} />}
+                    {view === 'favorites' && <FavoritesView responses={favoriteResponses} surveys={surveys} onNavigate={(v, d, i) => { setSelectedResponseIndex(i); navigate(v, d); }} onBack={() => setView('home')} />}
+                    {(view === 'create' || view === 'edit') && <SurveyFormView initialData={view === 'edit' ? currentSurvey : null} onSave={handleSaveSurvey} onBack={() => setView(view === 'edit' ? 'stats' : 'home')} />}
+                    {view === 'respond' && <RespondView survey={currentSurvey} onSubmit={handleAddResponse} onBack={() => setView('stats')} />}
+                    {view === 'stats' && <StatsView survey={currentSurvey} responses={currentResponses} onNavigate={(v, d, i) => { setSelectedResponseIndex(i); navigate(v, d); }} onBack={() => setView('home')} onDelete={handleDeleteSurvey} onToggleLike={toggleLike} onCopy={handleCopyURL} />}
+                    {view === 'share' && <ResponseGallery responses={currentSurvey ? currentResponses : favoriteResponses} initialIndex={selectedResponseIndex} survey={currentSurvey} surveys={surveys} onClose={() => setView(currentSurvey ? 'stats' : 'favorites')} />}
+
+                    {notification && (
+                        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[3000] animate-in fade-in slide-in-from-top-2">
+                            <div className="bg-slate-900/95 backdrop-blur-md text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-xl flex items-center gap-2 border border-white/10">
+                                <Lucide name="check-circle-2" size={14} className="text-emerald-400" />
+                                {notification}
+                            </div>
+                        </div>
+                    )}
+
+                    <ConfirmModal 
+                        isOpen={showLogoutConfirm} 
+                        title="ログアウト" 
+                        message="ログアウトしますか？" 
+                        confirmText="ログアウト" 
+                        cancelText="キャンセル" 
+                        isDanger={true}
+                        onConfirm={handleLogout} 
+                        onCancel={() => setShowLogoutConfirm(false)} 
+                    />
+
+                    {['home', 'stats', 'favorites'].includes(view) && (
+                        <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-auto bg-white/95 border border-slate-300 shadow-[0_15px_40px_rgba(0,0,0,0.08)] rounded-full flex items-center p-2 z-[100]">
+                            <button onClick={() => navigate('home')} className={`icon-btn-circle transition-all ${view === 'home' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
+                                <Lucide name="layout" size={20} />
+                            </button>
+                            <div className="w-4 shrink-0" />
+                            <button onClick={() => navigate('create')} className={`icon-btn-circle transition-all ${view === 'create' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
+                                <Lucide name="plus" size={20} />
+                            </button>
+                            <div className="w-4 shrink-0" />
+                            <button onClick={() => navigate('favorites')} className={`icon-btn-circle transition-all ${view === 'favorites' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
+                                <Lucide name="heart" size={20} fill={view === 'favorites' ? "currentColor" : "none"} />
+                            </button>
+                        </nav>
+                    )}
+                </div>
+            );
+        }
+
+        // --- Sub-View Components ---
+
+        function LoginView({ onLoginGoogle }) {
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-10 animate-in fade-in duration-700">
+                    <div className="text-center space-y-4">
+                        <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-tr from-indigo-500 to-purple-400 flex items-center justify-center text-white shadow-2xl mx-auto mb-6 animate-pulse-slow">
+                            <Lucide name="sparkles" size={40} />
+                        </div>
+                        <h1 className="text-4xl font-black tracking-tighter text-slate-900">coelog</h1>
+                    </div>
+                    
+                    <div className="w-full max-w-xs space-y-4">
+                        <button onClick={onLoginGoogle} className="google-btn w-full justify-center py-4 text-base active:scale-95 transition-all">
+                            <Lucide name="mail" size={20} />
+                            Googleで始める
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        function HomeView({ surveys, user, onLogoutRequest, onNavigate }) {
+            return (
+                <div className="space-y-6 animate-in fade-in duration-500">
+                    <header className="flex items-center justify-between py-1 px-1">
+                        <h1 className="text-xl font-black tracking-tighter text-slate-900">coelog</h1>
+                        <button onClick={onLogoutRequest} className="icon-btn-circle text-slate-400 bg-white shadow-sm border-visible active:scale-90 transition-all">
+                             <Lucide name="log-out" size={18} />
+                        </button>
+                    </header>
+                    <div className="grid gap-4 pb-24">
+                        {surveys.length === 0 ? (
+                            <button onClick={() => onNavigate('create')} className="w-full bg-white border-2 border-dashed border-slate-300 rounded-card py-12 text-center space-y-3"><Lucide name="plus" size={24} className="mx-auto text-indigo-200" /><p className="text-slate-500 text-xs font-bold">アンケートを作成</p></button>
+                        ) : surveys.map(s => (
+                            <button key={s.id} onClick={() => onNavigate('stats', s)} className="bg-white border-visible p-5 rounded-card text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center text-slate-400 font-black text-[9px]"><div className="p-1.5 bg-indigo-50 text-indigo-500 rounded-xl"><Lucide name="message-circle" size={14} /></div><span className="flex items-center gap-1"><Lucide name="clock" size={10} /> {formatDateTime(s.createdAt)}</span></div>
+                                    <div><h3 className="font-bold text-lg text-slate-800 leading-tight">{s.title}</h3><p className="text-xs text-slate-400 line-clamp-1 italic mt-1">"{s.question}"</p></div>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        function FavoritesView({ responses, surveys, onNavigate, onBack }) {
+            return (
+                <div className="space-y-6 animate-in fade-in duration-500">
+                    <header className="flex flex-col py-1 px-1"><h1 className="text-2xl font-black text-slate-900">お気に入り</h1><p className="text-slate-400 text-xs font-bold">心に残った大切な声</p></header>
+                    <div className="grid gap-3 pb-24">
+                        {responses.length === 0 ? <div className="bg-white/40 border-2 border-dashed border-slate-300 rounded-card py-16 text-center text-slate-300 text-xs font-bold italic">まだありません</div> : responses.map((res, i) => {
+                            const s = surveys.find(sur => sur.id === res.surveyId);
+                            return (
+                                <button key={res.id} onClick={() => onNavigate('share', null, i)} className="bg-white border-visible p-5 rounded-card text-left shadow-sm hover:shadow-indigo-50 transition-all active:scale-[0.98]">
+                                    <div className="space-y-2"><div className="flex justify-between text-[9px] font-black text-indigo-400 uppercase tracking-widest"><span>{s?.title || "テーマ不明"}</span><span className="text-slate-400">{formatDateTime(res.createdAt)}</span></div><p className="font-bold text-slate-700 leading-relaxed italic text-sm line-clamp-3">"{res.answer}"</p></div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        }
+
+        function SurveyFormView({ initialData, onSave, onBack }) {
+            const [title, setTitle] = useState(initialData?.title || '');
+            const [question, setQuestion] = useState(initialData?.question || '');
+            const [gradientId, setGradientId] = useState(initialData?.gradientId || 'purple');
+            const [showConfirm, setShowConfirm] = useState(false);
+            const isEdit = !!initialData;
+            
+            const hasChanges = useMemo(() => {
+                const initialTitle = initialData?.title || '';
+                const initialQuestion = initialData?.question || '';
+                const initialGradient = initialData?.gradientId || 'purple';
+                return title !== initialTitle || question !== initialQuestion || gradientId !== initialGradient;
+            }, [title, question, gradientId, initialData]);
+
+            const handleBack = () => {
+                if (hasChanges) setShowConfirm(true);
+                else onBack();
+            };
+
+            return (
+                <div className="space-y-4 animate-in slide-in-from-right-4 duration-400 pb-20">
+                    <header className="flex items-center justify-between py-1">
+                        <button onClick={handleBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button>
+                        <h2 className="font-black text-sm text-slate-900">{isEdit ? '内容を編集' : '新しく作る'}</h2><div className="w-11 h-11 shrink-0" />
+                    </header>
+                    <div className="bg-white border-visible rounded-card p-6 shadow-sm space-y-6">
+                        <div className="space-y-2"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">アンケート名</label><input type="text" placeholder="例：次回のテーマについて" className="w-full bg-transparent border-b-2 border-slate-200 focus:border-indigo-400 outline-none py-1.5 text-xl font-bold transition-all placeholder:text-slate-300" value={title} onChange={e => setTitle(e.target.value)} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">質問の内容</label><textarea placeholder="聞きたいことをひとつだけ" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold focus:bg-white focus:border-indigo-400 outline-none transition-all resize-none h-32" value={question} onChange={e => setQuestion(e.target.value)} /></div>
+                        <div className="space-y-3 pt-1"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">デザイン</label><div className="flex flex-wrap gap-3 px-1">{GRADIENTS.map(g => (<button key={g.id} onClick={() => setGradientId(g.id)} className={`w-9 h-9 rounded-full transition-all relative ${g.class} ${gradientId === g.id ? 'scale-110 ring-4 ring-indigo-50 shadow-md' : 'opacity-60'}`}>{gradientId === g.id && <Lucide name="check" size={14} className="text-white mx-auto drop-shadow-md" />}</button>))}</div></div>
+                    </div>
+                    <div className="flex flex-col items-center gap-4 pt-4">
+                        <button onClick={() => onSave({ id: initialData?.id, title, question, gradientId })} disabled={!title || !question} className={`px-12 py-4 h-14 rounded-full font-black text-lg text-white shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all ${!title || !question ? 'bg-slate-300 shadow-none' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 border border-indigo-400'}`}>{isEdit ? '保存する' : '公開する'} <Lucide name="send" size={20} /></button>
+                        <button onClick={onBack} className="text-slate-500 font-bold text-sm hover:text-slate-800 transition-colors py-2 px-6">キャンセル</button>
+                    </div>
+                    <ConfirmModal isOpen={showConfirm} title="確認" message="入力した内容は保存されませんが、よろしいですか？" confirmText="破棄して戻る" cancelText="続ける" onConfirm={onBack} onCancel={() => setShowConfirm(false)} />
+                </div>
+            );
+        }
+
+        function StatsView({ survey, responses, onNavigate, onBack, onDelete, onToggleLike, onCopy }) {
+            const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+            const theme = GRADIENTS.find(g => g.id === survey?.gradientId) || GRADIENTS[0];
+            return (
+                <div className="space-y-6 animate-in slide-in-from-right-4 duration-400 pb-24">
+                    <header className="flex items-center justify-between py-1"><button onClick={onBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="icon-btn-circle text-indigo-600 bg-white shadow-sm border-visible border-indigo-200 active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
+                    <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button><button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
+                    <section className="space-y-4"><div className="flex justify-between items-center px-2 text-[10px] font-black text-slate-500 uppercase tracking-widest"><h3>最近の回答</h3><button onClick={() => setShowDeleteConfirm(true)} className="text-pink-500 flex items-center gap-1"><Lucide name="trash-2" size={11} /> 削除</button></div>
+                        <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => (
+                            <div key={res.id} onClick={() => onNavigate('share', survey, i)} className={`bg-white border-visible p-5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}>
+                                <div className="flex items-start justify-between">
+                                    <div className="flex flex-col gap-1.5 w-full pr-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-[9px] shrink-0 ${res.allowSns ? 'bg-indigo-50 text-indigo-500' : 'bg-pink-50 text-pink-500'}`}>{res.allowSns ? `#${responses.length - i}` : <Lucide name="lock" size={10} />}</div>
+                                            <div className="text-[10px] text-slate-500 font-bold">{formatDateTime(res.createdAt)}</div>
+                                            {!res.allowSns && <span className="text-[8px] font-black text-pink-400 uppercase tracking-tighter shrink-0 border border-pink-100 px-1.5 py-0.5 rounded-full">SNS不可</span>}
+                                        </div>
+                                    </div>
+                                    <button onClick={e => { e.stopPropagation(); onToggleLike(res.id); }} className={`w-8 h-8 flex items-center justify-center rounded-xl transition-all shrink-0 ${res.liked ? 'bg-pink-50 text-pink-500' : 'text-slate-300 hover:bg-slate-50'}`}><Lucide name="heart" size={18} fill={res.liked ? "currentColor" : "none"} /></button>
+                                </div>
+                                <p className="font-bold text-slate-800 italic text-sm leading-relaxed break-words">"{res.answer}"</p>
+                            </div>
+                        ))}</div>
+                    </section>
+                    <ConfirmModal isOpen={showDeleteConfirm} title="アンケートの削除" message="アンケートとすべての回答が完全に削除されます。よろしいですか？" confirmText="削除する" cancelText="キャンセル" isDanger={true} onConfirm={() => { setShowDeleteConfirm(false); onDelete(survey.id); }} onCancel={() => setShowDeleteConfirm(false)} />
+                </div>
+            );
+        }
+
+        function RespondView({ survey, onSubmit, onBack, isPreview }) {
+            const [answer, setAnswer] = useState('');
+            const [allowSns, setAllowSns] = useState(true);
+            const [submitted, setSubmitted] = useState(false);
+            const handleSubmitClick = async () => {
+                if (!answer) return;
+                await onSubmit(answer, allowSns);
+                setSubmitted(true);
+            };
+            
+            const handleCloseWindow = () => {
+                window.open('about:blank','_self').close();
+                setTimeout(() => alert("ブラウザのタブを閉じて終了してください"), 500);
+            };
+
+            if (submitted) return (<div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-4 animate-in zoom-in-95 duration-500"><div className="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-3xl flex items-center justify-center shadow-lg mb-6"><Lucide name="check-circle-2" size={32} /></div><h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">回答ありがとうございました</h2><p className="text-slate-400 text-xs font-bold mb-10">あなたの想いは確かに届けられました。</p>{isPreview ? <button onClick={onBack} className="bg-indigo-600 text-white px-10 py-4 h-14 rounded-full font-black text-sm shadow-xl active:scale-95">プレビューを終了</button> : <button onClick={handleCloseWindow} className="bg-slate-100 text-slate-500 px-10 py-4 rounded-full font-black text-sm hover:bg-slate-200 transition-all">終了する</button>}</div>);
+            return (
+                <div className="animate-in slide-in-from-bottom-8 duration-600 space-y-6">
+                    <header className="flex justify-center items-center relative py-2">
+                        {isPreview && <button onClick={onBack} className="absolute left-0 icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="x" size={18} /></button>}
+                        <h1 className="text-xl font-black text-slate-900 tracking-tight text-center w-full">{survey.title}</h1>
+                    </header>
+                    <div className="flex justify-center"><div className="inline-flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100"><Lucide name="shield-check" size={12} className="text-indigo-500" /><p className="text-[10px] font-black text-indigo-600 tracking-tight text-center">回答は匿名です。誰にもわかりません。</p></div></div>
+                    <div className="space-y-6 text-center"><p className="text-xl font-black text-slate-800 italic px-4 leading-snug">"{survey.question}"</p><div className="relative"><textarea placeholder="ここに答えを書いてください..." className="w-full bg-transparent text-lg font-bold focus:outline-none transition-all resize-none min-h-[280px] leading-relaxed py-4 text-center placeholder:text-slate-300" value={answer} maxLength={MAX_ANSWER_LENGTH} onChange={e => setAnswer(e.target.value)} /><div className={`text-[10px] font-black tracking-widest mt-2 ${answer.length >= MAX_ANSWER_LENGTH ? 'text-pink-500' : 'text-slate-400'}`}>{answer.length} / {MAX_ANSWER_LENGTH}</div></div>
+                        <div className="space-y-6 flex flex-col items-center pt-2"><button onClick={() => setAllowSns(!allowSns)} className="flex items-center gap-2.5 py-1 select-none group"><div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all shrink-0 ${allowSns ? 'bg-indigo-500 border-indigo-500 shadow-md' : 'border-slate-300'}`}>{allowSns && <Lucide name="check" size={14} className="text-white" />}</div><span className={`text-[11px] font-black transition-colors ${allowSns ? 'text-indigo-600' : 'text-slate-500'}`}>SNS等への掲載を許可する</span></button>
+                            <button onClick={handleSubmitClick} disabled={!answer} className={`px-12 py-4 h-14 rounded-full font-black text-lg text-white shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all ${!answer ? 'bg-slate-200 shadow-none' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 border border-indigo-400'}`}>想いを届ける <Lucide name="send" size={20} /></button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function ResponseGallery({ responses, initialIndex, survey, surveys, onClose }) {
+            const [index, setIndex] = useState(initialIndex);
+            const response = responses[index];
+            const activeSurvey = survey || surveys.find(s => s.id === response.surveyId);
+            const theme = GRADIENTS.find(g => g.id === activeSurvey?.gradientId) || GRADIENTS[0];
+            const getFontSize = (text) => text.length < 20 ? 'text-4xl' : text.length < 40 ? 'text-3xl' : text.length < 80 ? 'text-2xl' : 'text-xl';
+            const goPrev = (e) => { e.stopPropagation(); if (index > 0) setIndex(index - 1); };
+            const goNext = (e) => { e.stopPropagation(); if (index < responses.length - 1) setIndex(index + 1); };
+            
+            // 安全対策: データがない場合は何も表示しないかローディング
+            if (!response) return null;
+
+            return (
+                <div className="fixed inset-0 z-[100] bg-[#fcfdff] flex flex-col h-full w-full">
+                    <div className="px-5 py-4 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-100 z-10 shrink-0">
+                         <button onClick={onClose} className="flex items-center gap-2 text-slate-500 font-bold text-sm bg-slate-100 px-4 py-2 rounded-full active:scale-95 transition-all"><Lucide name="x" size={18} /> 閉じる</button>
+                        <span className="font-black text-slate-400 text-xs tracking-widest">{index + 1} / {responses.length}</span>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-5 flex flex-col items-center justify-center min-h-0">
+                        <div className={`w-full max-w-sm ${theme.class} rounded-3xl shadow-2xl relative flex flex-col overflow-hidden shrink-0`} style={{ minHeight: '60vh', maxHeight: '80vh' }}>
+                            <div className="absolute -top-20 -left-20 w-[200px] h-[200px] bg-white/20 rounded-full blur-[60px]" /><div className="absolute bottom-0 right-0 w-[150px] h-[150px] bg-white/10 rounded-full blur-[50px]" />
+                            <div className="relative z-10 flex flex-col h-full p-8"><div className="mb-6 shrink-0"><div className="text-white/70 text-[10px] font-black uppercase tracking-[0.2em] mb-2 flex items-center gap-2"><span className="w-6 h-[1px] bg-white/40 shrink-0" /> THEME</div><h1 className="text-white text-2xl font-black leading-tight drop-shadow-md mb-2">{activeSurvey?.title || "お気に入り"}</h1><div className="text-white/80 flex items-center gap-1.5"><span className="text-[10px] font-bold opacity-70">by Suze</span></div></div>
+                                <div className="flex-1 flex flex-col justify-center min-h-0"><div className="bg-white/10 backdrop-blur-md border border-white/20 px-6 py-8 rounded-3xl shadow-inner w-full flex flex-col justify-center overflow-y-auto custom-scrollbar">
+                                    {!response.allowSns && <div className="mb-4 inline-flex self-start items-center gap-1.5 px-2.5 py-1 bg-pink-500/30 rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shrink-0"><Lucide name="lock" size={10} /> SNS不可</div>}
+                                    <div className="space-y-6">{activeSurvey && <div className="text-white/90 text-xs font-bold flex items-start gap-2 leading-relaxed"><span className="w-1.5 h-1.5 bg-white/80 rounded-full shrink-0 mt-1.5" />{activeSurvey.question}</div>}<div className={`text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`} style={{ lineHeight: '1.6' }}>"{response.answer}"</div></div>
+                                </div></div>
+                                <div className="mt-6 text-center shrink-0"><span className="text-white/40 text-[9px] font-black uppercase tracking-[0.3em]">coelog gallery</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="p-6 bg-white border-t border-slate-100 shrink-0 flex justify-center gap-8 pb-safe"><button onClick={goPrev} disabled={index === 0} className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${index === 0 ? 'text-slate-200 bg-slate-50' : 'text-slate-600 bg-white border border-slate-200 shadow-lg active:scale-95'}`}><Lucide name="chevron-left" size={28} /></button><button onClick={goNext} disabled={index === responses.length - 1} className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${index === responses.length - 1 ? 'text-slate-200 bg-slate-50' : 'text-slate-600 bg-white border border-slate-200 shadow-lg active:scale-95'}`}><Lucide name="chevron-right" size={28} /></button></div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
 </body>
 </html>
