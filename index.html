@@ -33,20 +33,23 @@
         
         .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-
-        /* スムースな出現アニメーション */
-        @keyframes scaleIn {
-            0% { transform: scale(0.95); opacity: 0; }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .animate-scale-in { animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        
-        /* ふわふわ浮かぶアニメーション */
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
+        .animate-pop-in { animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+        @keyframes slideUpFade {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
-        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-slide-up { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
 
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         .pt-safe { padding-top: env(safe-area-inset-top); }
@@ -88,7 +91,6 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
         
         .no-callout { -webkit-touch-callout: none; }
-        .allow-select { user-select: text; -webkit-user-select: text; }
     </style>
 </head>
 <body class="antialiased">
@@ -149,6 +151,7 @@
             return <span ref={iconRef} className={`inline-flex items-center justify-center shrink-0 aspect-square ${className}`}></span>;
         };
 
+        // --- Long Press Hook ---
         const useLongPress = (callback = () => {}, ms = 800) => {
             const [startLongPress, setStartLongPress] = useState(false);
             useEffect(() => {
@@ -213,12 +216,17 @@
                         if (u) {
                             setUser(u);
                             if (surveyId) {
-                                const doc = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys').doc(surveyId).get();
-                                if (doc.exists) {
-                                    setCurrentSurvey({ id: doc.id, ...doc.data() });
-                                    setView('respond');
-                                } else {
-                                    setView('home'); 
+                                try {
+                                    const doc = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys').doc(surveyId).get();
+                                    if (doc.exists) {
+                                        setCurrentSurvey({ id: doc.id, ...doc.data() });
+                                        setView('respond');
+                                    } else {
+                                        setView('home'); 
+                                    }
+                                } catch (e) {
+                                    console.error(e);
+                                    setView('home');
                                 }
                             } else {
                                 setView('home'); 
@@ -242,10 +250,12 @@
                 const unsubSurveys = path.collection('surveys').onSnapshot(snap => {
                     const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     setSurveys(data.filter(s => s.creatorId === user.uid).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
-                }, e => console.error("Survey Fetch Error:", e));
+                }, e => console.error("Survey Error:", e));
+                
                 const unsubResponses = path.collection('responses').onSnapshot(snap => {
                     setResponses(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-                }, e => console.error("Response Fetch Error:", e));
+                }, e => console.error("Response Error:", e));
+                
                 return () => { unsubSurveys(); unsubResponses(); };
             }, [user, appId]);
 
@@ -259,7 +269,11 @@
                     setView('home');
                 } catch (e) {
                     console.error(e);
-                    showToast("ログイン失敗");
+                    if (e.code === 'auth/unauthorized-domain') {
+                        alert("エラー: このドメインは許可されていません。Firebase ConsoleでAuthentication > Settings > Authorized domains にドメインを追加してください。");
+                    } else {
+                        showToast("ログイン失敗: " + e.message);
+                    }
                 }
             };
 
@@ -270,6 +284,7 @@
                 showToast("ログアウトしました");
             };
 
+            // URLコピー機能の修正（画面揺れ防止）
             const handleCopyURL = () => {
                 if (!currentSurvey) return;
                 const url = window.location.origin + window.location.pathname + "?id=" + currentSurvey.id;
@@ -277,6 +292,8 @@
                 textArea.value = url;
                 textArea.style.position = "fixed";
                 textArea.style.left = "-9999px";
+                textArea.style.top = "0";
+                textArea.readOnly = true; // キーボード表示防止
                 document.body.appendChild(textArea);
                 textArea.select();
                 try {
@@ -295,6 +312,7 @@
                     const cleanData = {};
                     Object.keys(data).forEach(key => { if(data[key] !== undefined) cleanData[key] = data[key]; });
                     const ref = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys');
+                    
                     if (id) {
                         await ref.doc(id).update(cleanData);
                         showToast("更新しました");
@@ -511,6 +529,7 @@
             const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
             const [deleteResId, setDeleteResId] = useState(null);
             
+            // クラッシュ防止：長押しイベントをReact標準イベントでバインド
             const bindLongPress = (id) => useLongPress(() => setDeleteResId(id), 800);
             const theme = GRADIENTS.find(g => g.id === survey?.gradientId) || GRADIENTS[0];
             
@@ -520,6 +539,7 @@
                     <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button><button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
                     <section className="space-y-4"><div className="flex justify-between items-center px-2 text-[10px] font-black text-slate-500 uppercase tracking-widest"><h3>最近の回答</h3><button onClick={() => setShowDeleteConfirm(true)} className="text-pink-500 flex items-center gap-1"><Lucide name="trash-2" size={11} /> 削除</button></div>
                         <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => {
+                             // 長押しフックの安全な適用
                              const longPressProps = bindLongPress(res.id);
                              return (
                                 <div key={res.id} 
@@ -566,14 +586,14 @@
             const theme = GRADIENTS.find(g => g.id === survey?.gradientId) || GRADIENTS[0];
 
             if (submitted) return (
-                <div className={`fixed inset-0 z-50 ${theme.class} flex flex-col items-center justify-center p-6 transition-all duration-700`}>
+                <div className={`fixed inset-0 z-50 ${theme.class} flex flex-col items-center justify-center p-6 animate-in zoom-in-95 duration-500`}>
                     <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-10 shadow-2xl w-full max-w-sm text-center animate-scale-in">
                         <div className="w-20 h-20 bg-white text-indigo-500 rounded-full flex items-center justify-center shadow-lg mb-6 mx-auto animate-float"><Lucide name="check" size={36} strokeWidth={4} /></div>
-                        <h2 className="text-2xl font-black text-white tracking-tight mb-2 drop-shadow-md">Thank You!</h2>
-                        <p className="text-white/80 text-sm font-bold leading-relaxed mb-10">回答ありがとうございました。</p>
+                        <h2 className="text-2xl font-black text-white tracking-tight mb-2 drop-shadow-md animate-slide-up delay-100">Thank You!</h2>
+                        <p className="text-white/80 text-sm font-bold leading-relaxed mb-10 animate-slide-up delay-200">回答ありがとうございました。</p>
                         {isPreview ? 
-                            <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all hover:shadow-2xl">回答一覧に戻る</button> : 
-                            <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95">画面を閉じる</button>
+                            <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all hover:shadow-2xl animate-slide-up delay-300">回答一覧に戻る</button> : 
+                            <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95 animate-slide-up delay-300">画面を閉じる</button>
                         }
                     </div>
                 </div>
@@ -619,6 +639,59 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            );
+        }
+
+        function ResponseGallery({ responses, initialIndex, survey, surveys, onClose }) {
+            // 安全策: データがない場合のガード
+            if (!responses || responses.length === 0 || !responses[initialIndex]) return null;
+            
+            const [index, setIndex] = useState(initialIndex);
+            // インデックスが範囲外にならないよう監視
+            useEffect(() => {
+                if (index >= responses.length) {
+                    setIndex(Math.max(0, responses.length - 1));
+                }
+            }, [responses.length]);
+
+            const response = responses[index];
+            if (!response) return null; // 再度ガード
+
+            const activeSurvey = survey || surveys.find(s => s.id === response.surveyId);
+            const theme = GRADIENTS.find(g => g.id === activeSurvey?.gradientId) || GRADIENTS[0];
+            const getFontSize = (text) => text.length < 20 ? 'text-4xl' : text.length < 40 ? 'text-3xl' : text.length < 80 ? 'text-2xl' : 'text-xl';
+            const goPrev = (e) => { e.stopPropagation(); if (index > 0) setIndex(index - 1); };
+            const goNext = (e) => { e.stopPropagation(); if (index < responses.length - 1) setIndex(index + 1); };
+            
+            return (
+                <div className={`fixed inset-0 z-[100] ${theme.class} flex flex-col h-full w-full animate-in fade-in duration-300`}>
+                    <div className="absolute top-0 left-0 w-full p-4 pt-safe z-20 flex justify-end items-center pointer-events-none">
+                        <button onClick={onClose} className="pointer-events-auto w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md active:scale-95 transition-all shadow-sm"><Lucide name="x" size={18} /></button>
+                    </div>
+                    <div className="flex-1 flex flex-col items-center justify-center p-6 min-h-0 relative">
+                        <div className="absolute -top-20 -left-20 w-[300px] h-[300px] bg-white/20 rounded-full blur-[80px]" /><div className="absolute bottom-0 right-0 w-[200px] h-[200px] bg-white/10 rounded-full blur-[60px]" />
+                        <div className="w-full max-w-sm bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl relative flex flex-col overflow-hidden shrink-0 z-10" style={{ maxHeight: '75vh' }}>
+                            <div className="relative z-10 flex flex-col h-full overflow-hidden">
+                                <div className="p-6 pb-0 shrink-0 text-center">
+                                    <div className="text-white/70 text-[10px] font-black uppercase tracking-[0.2em] mb-2 flex items-center justify-center gap-2"><span className="w-6 h-[1px] bg-white/40 shrink-0" /> 質問のテーマ</div>
+                                    <h1 className="text-white text-xl font-black leading-tight drop-shadow-md mb-2">{activeSurvey?.title || "お気に入り"}</h1>
+                                </div>
+                                <div className="flex-1 flex flex-col justify-center items-center p-6 overflow-hidden relative">
+                                    <div className="w-full border-b border-white/20 pb-4 mb-6">{activeSurvey && <div className="text-white/90 text-sm font-bold leading-relaxed text-center">"{activeSurvey.question}"</div>}</div>
+                                    <div className={`w-full text-center text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`} style={{ lineHeight: '1.6' }}>"{response.answer}"</div>
+                                    {!response.allowSns && <div className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-pink-500/50 rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shadow-lg"><Lucide name="lock" size={10} /> SNS不可</div>}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {/* ナビゲーションボタン (複数ある場合のみ表示) */}
+                    {responses.length > 1 && (
+                        <div className="absolute bottom-0 w-full p-6 pb-safe z-20 flex justify-center gap-12 pointer-events-none">
+                            <button onClick={goPrev} disabled={index === 0} className={`pointer-events-auto w-12 h-12 rounded-full flex items-center justify-center transition-all ${index === 0 ? 'text-white/10 bg-white/5 cursor-not-allowed' : 'text-white bg-white/10 border border-white/20 shadow-lg active:scale-95 hover:bg-white/20 backdrop-blur-md'}`}><Lucide name="chevron-left" size={24} /></button>
+                            <button onClick={goNext} disabled={index === responses.length - 1} className={`pointer-events-auto w-12 h-12 rounded-full flex items-center justify-center transition-all ${index === responses.length - 1 ? 'text-white/10 bg-white/5 cursor-not-allowed' : 'text-white bg-white/10 border border-white/20 shadow-lg active:scale-95 hover:bg-white/20 backdrop-blur-md'}`}><Lucide name="chevron-right" size={24} /></button>
+                        </div>
+                    )}
                 </div>
             );
         }
