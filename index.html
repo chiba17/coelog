@@ -64,8 +64,8 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         
-        /* リストなどの角丸調整（少し抑えめに） */
-        .rounded-card { border-radius: 1rem !important; } /* rounded-2xl相当 */
+        /* リストなどの角丸調整 */
+        .rounded-card { border-radius: 1rem !important; }
     </style>
 </head>
 <body class="antialiased">
@@ -101,7 +101,8 @@
             { id: 'sunset', name: 'サンセット', class: 'bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600' },
             { id: 'ocean', name: 'オーシャン', class: 'bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600' },
             { id: 'nature', name: 'ネイチャー', class: 'bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600' },
-            { id: 'midnight', name: 'ミッドナイト', class: 'bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800' },
+            // ダークすぎない調整版ミッドナイト
+            { id: 'midnight', name: 'ミッドナイト', class: 'bg-gradient-to-br from-indigo-900 via-slate-800 to-gray-900' },
         ];
 
         const formatDateTime = (ts) => {
@@ -168,7 +169,6 @@
             useEffect(() => {
                 const initAuth = async () => {
                     await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-                    
                     const params = new URLSearchParams(window.location.search);
                     const surveyId = params.get('id');
 
@@ -260,9 +260,11 @@
                     const cleanData = {};
                     Object.keys(data).forEach(key => { if(data[key] !== undefined) cleanData[key] = data[key]; });
                     const ref = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys');
+                    
                     if (id) {
                         await ref.doc(id).update(cleanData);
                         showToast("更新しました");
+                        setCurrentSurvey({ id, ...cleanData });
                         setView('stats');
                     } else {
                         await ref.add({ ...cleanData, creatorId: user.uid, createdAt: firebase.firestore.Timestamp.now() });
@@ -429,10 +431,23 @@
             const [gradientId, setGradientId] = useState(initialData?.gradientId || 'purple');
             const [showConfirm, setShowConfirm] = useState(false);
             const isEdit = !!initialData;
+            
+            const hasChanges = useMemo(() => {
+                const initialTitle = initialData?.title || '';
+                const initialQuestion = initialData?.question || '';
+                const initialGradient = initialData?.gradientId || 'purple';
+                return title !== initialTitle || question !== initialQuestion || gradientId !== initialGradient;
+            }, [title, question, gradientId, initialData]);
+
+            const handleBack = () => {
+                if (hasChanges) setShowConfirm(true);
+                else onBack();
+            };
+
             return (
                 <div className="space-y-4 animate-in slide-in-from-right-4 duration-400 pb-20">
                     <header className="flex items-center justify-between py-1">
-                        <button onClick={() => (title || question ? setShowConfirm(true) : onBack())} className="btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button>
+                        <button onClick={handleBack} className="btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button>
                         <h2 className="font-black text-sm text-slate-900">{isEdit ? '内容を編集' : '新しく作る'}</h2><div className="w-11 h-11 shrink-0" />
                     </header>
                     <div className="bg-white border-visible rounded-card p-6 shadow-sm space-y-6">
@@ -454,7 +469,7 @@
             const theme = GRADIENTS.find(g => g.id === survey?.gradientId) || GRADIENTS[0];
             return (
                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-400 pb-24">
-                    <header className="flex items-center justify-between py-1"><button onClick={onBack} className="btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
+                    <header className="flex items-center justify-between py-1"><button onClick={onBack} className="btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="btn-circle text-indigo-600 bg-white shadow-sm border-visible border-indigo-200 active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
                     <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button><button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
                     <section className="space-y-4"><div className="flex justify-between items-center px-2 text-[10px] font-black text-slate-500 uppercase tracking-widest"><h3>最近の回答</h3><button onClick={() => setShowDeleteConfirm(true)} className="text-pink-500 flex items-center gap-1"><Lucide name="trash-2" size={11} /> 削除</button></div>
                         <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => (
@@ -487,7 +502,14 @@
                 await onSubmit(answer, allowSns);
                 setSubmitted(true);
             };
-            if (submitted) return (<div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-4 animate-in zoom-in-95 duration-500"><div className="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-3xl flex items-center justify-center shadow-lg mb-6"><Lucide name="check-circle-2" size={32} /></div><h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">回答ありがとうございました</h2><p className="text-slate-400 text-xs font-bold mb-10">あなたの想いは確かに届けられました。</p>{isPreview ? <button onClick={onBack} className="bg-indigo-600 text-white px-10 py-4 h-14 rounded-full font-black text-sm shadow-xl active:scale-95">プレビューを終了</button> : <button onClick={() => window.location.reload()} className="bg-slate-100 text-slate-500 px-10 py-4 rounded-full font-black text-sm hover:bg-slate-200 transition-all">終了する</button>}</div>);
+            
+            const handleCloseWindow = () => {
+                window.open('about:blank','_self').close();
+                // 閉じない場合のメッセージ
+                setTimeout(() => alert("ブラウザのタブを閉じて終了してください"), 500);
+            };
+
+            if (submitted) return (<div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-4 animate-in zoom-in-95 duration-500"><div className="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-3xl flex items-center justify-center shadow-lg mb-6"><Lucide name="check-circle-2" size={32} /></div><h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">回答ありがとうございました</h2><p className="text-slate-400 text-xs font-bold mb-10">あなたの想いは確かに届けられました。</p>{isPreview ? <button onClick={onBack} className="bg-indigo-600 text-white px-10 py-4 h-14 rounded-full font-black text-sm shadow-xl active:scale-95">プレビューを終了</button> : <button onClick={handleCloseWindow} className="bg-slate-100 text-slate-500 px-10 py-4 rounded-full font-black text-sm hover:bg-slate-200 transition-all">終了する</button>}</div>);
             return (
                 <div className="animate-in slide-in-from-bottom-8 duration-600 space-y-6">
                     <header className="flex justify-center items-center relative py-2">
@@ -513,20 +535,18 @@
             const theme = GRADIENTS.find(g => g.id === activeSurvey?.gradientId) || GRADIENTS[0];
             const startFullscreen = (e) => { e.stopPropagation(); if (galleryRef.current?.requestFullscreen) galleryRef.current.requestFullscreen(); else if (galleryRef.current?.webkitRequestFullscreen) galleryRef.current.webkitRequestFullscreen(); setIsFullscreen(true); };
             useEffect(() => { const handler = () => { if (!document.fullscreenElement) setIsFullscreen(false); }; document.addEventListener('fullscreenchange', handler); return () => document.removeEventListener('fullscreenchange', handler); }, []);
-            const getFontSize = (text) => text.length < 20 ? 'text-4xl' : text.length < 40 ? 'text-3xl' : text.length < 80 ? 'text-2xl' : 'text-xl';
-            const goPrev = (e) => { e.stopPropagation(); if (index > 0) setIndex(index - 1); };
-            const goNext = (e) => { e.stopPropagation(); if (index < responses.length - 1) setIndex(index + 1); };
             return (
-                <div ref={galleryRef} className={`fixed inset-0 z-[100] bg-white flex flex-col items-center animate-in fade-in duration-300 select-none ${isFullscreen ? 'justify-start' : 'justify-center'}`} onClick={() => isFullscreen && document.exitFullscreen()}>
-                    {!isFullscreen && (<div className="absolute top-6 w-full px-8 flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] z-20"><button onClick={onClose} className="flex items-center gap-1.5 hover:text-slate-900 transition-colors bg-slate-50 px-3.5 py-1.5 rounded-full border-visible shrink-0 shadow-sm"><Lucide name="arrow-left" size={14} /> 戻る</button><span className="font-bold shrink-0">{index + 1} / {responses.length}</span></div>)}
-                    <div key={index} className={`w-full max-w-[420px] ${theme.class} relative overflow-hidden transition-all duration-700 ${isFullscreen ? 'h-full rounded-none' : 'h-[80vh] rounded-[3.2rem] shadow-[0_80px_150px_rgba(99,102,241,0.3)]'}`}>
-                        <div className="absolute -top-20 -left-20 w-[300px] h-[300px] bg-white/20 rounded-full blur-[80px]" /><div className="absolute bottom-0 right-0 w-[200px] h-[200px] bg-white/10 rounded-full blur-[60px]" />
+                <div ref={galleryRef} className={`fixed inset-0 z-[100] ${theme.class} flex flex-col items-center animate-in fade-in duration-300 select-none ${isFullscreen ? 'justify-start' : 'justify-center'} cursor-pointer`} onClick={() => isFullscreen && document.exitFullscreen()}>
+                    {!isFullscreen && (<div className="absolute top-6 w-full px-8 flex justify-between items-center text-[10px] font-black text-white uppercase tracking-[0.4em] z-20"><button onClick={onClose} className="flex items-center gap-1.5 hover:bg-white/20 transition-colors bg-white/10 px-3.5 py-1.5 rounded-full border border-white/20 shrink-0 shadow-sm text-white"><Lucide name="arrow-left" size={14} /> 戻る</button><span className="font-bold shrink-0">{index + 1} / {responses.length}</span></div>)}
+                    <div key={index} className={`w-full max-w-[420px] relative overflow-hidden transition-all duration-700 ${isFullscreen ? 'h-full rounded-none' : 'h-[80vh] rounded-[3.2rem] shadow-2xl bg-white/5 border border-white/10'}`}>
                         <div className="relative z-10 flex flex-col h-full px-8 pt-[18%] pb-[25%]"><header className="mb-6 flex-shrink-0 animate-in fade-in slide-in-from-top-4 duration-1000"><div className="text-white/70 text-[10px] font-black uppercase tracking-[0.4em] mb-4 flex items-center gap-2"><span className="w-8 h-[1px] bg-white/40 shrink-0" /> 質問のテーマ</div><div className="space-y-1"><h1 className="text-white text-3xl font-black leading-tight drop-shadow-md">{activeSurvey?.title || "お気に入り"}</h1><span className="text-xs font-bold text-white/80 opacity-70">by Suze</span></div></header>
                             <div className="flex-1 flex flex-col justify-center animate-in fade-in zoom-in-95 duration-1000"><div className="bg-white/10 backdrop-blur-3xl border border-white/25 px-6 py-10 rounded-[3.2rem] shadow-2xl relative w-full flex flex-col justify-center min-h-[360px]">{!response.allowSns && <div className="absolute top-4 left-6 flex items-center gap-1.5 px-3 py-1 bg-pink-500/30 backdrop-blur-md rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shrink-0 shadow-sm z-20"><Lucide name="lock" size={10} /> SNS掲載不可</div>}
                                 <div className="space-y-8 mt-2">{activeSurvey && <div className="text-white/95 text-sm font-bold flex items-start gap-3 px-1"><span className="w-[3px] h-5 bg-white/80 rounded-full flex-shrink-0 mt-0.5" />{activeSurvey.question}</div>}<div className={`text-white font-bold italic drop-shadow-md break-words px-1 ${getFontSize(response.answer)}`} style={{ lineHeight: '1.5' }}>"{response.answer}"</div></div></div></div>
                             <div className="absolute bottom-6 left-0 w-full text-center pointer-events-none opacity-40 text-white text-[9px] font-black uppercase tracking-[0.4em]">coelog gallery</div></div>
                     </div>
-                    {!isFullscreen && (<div className="mt-8 flex items-center gap-5 animate-in slide-in-from-bottom-4 duration-500"><button onClick={(e) => { e.stopPropagation(); if(index>0)setIndex(index-1); }} disabled={index === 0} className={`btn-circle transition-all shrink-0 ${index === 0 ? 'opacity-10' : 'text-indigo-600 bg-white border-visible shadow-sm active:scale-90'}`}><Lucide name="chevron-left" size={24} /></button><button onClick={(e) => { e.stopPropagation(); if (galleryRef.current?.requestFullscreen) galleryRef.current.requestFullscreen(); else if (galleryRef.current?.webkitRequestFullscreen) galleryRef.current.webkitRequestFullscreen(); setIsFullscreen(true); }} className="bg-indigo-600 text-white px-7 h-12 rounded-full font-black text-sm shadow-xl active:scale-95 border border-indigo-400 flex items-center gap-2 shrink-0"><Lucide name="maximize-2" size={16} /> 全画面で撮影</button><button onClick={(e) => { e.stopPropagation(); if(index < responses.length-1)setIndex(index+1); }} disabled={index === responses.length - 1} className={`btn-circle transition-all shrink-0 ${index === responses.length - 1 ? 'opacity-10' : 'text-indigo-600 bg-white border-visible shadow-sm active:scale-90'}`}><Lucide name="chevron-right" size={24} /></button></div>)}
+                    {!isFullscreen && (<div className="mt-8 flex items-center gap-5 animate-in slide-in-from-bottom-4 duration-500"><button onClick={(e) => { e.stopPropagation(); if(index>0)setIndex(index-1); }} disabled={index === 0} className={`btn-circle transition-all shrink-0 ${index === 0 ? 'opacity-10' : 'text-white bg-white/10 border border-white/20 shadow-sm active:scale-90 hover:bg-white/20'}`}><Lucide name="chevron-left" size={24} /></button><button onClick={(e) => { e.stopPropagation(); if (galleryRef.current?.requestFullscreen) galleryRef.current.requestFullscreen(); else if (galleryRef.current?.webkitRequestFullscreen) galleryRef.current.webkitRequestFullscreen(); setIsFullscreen(true); }} className="bg-white text-indigo-900 px-7 h-12 rounded-full font-black text-sm shadow-xl active:scale-95 flex items-center gap-2 shrink-0"><Lucide name="maximize-2" size={16} /> 全画面で撮影</button><button onClick={(e) => { e.stopPropagation(); if(index < responses.length-1)setIndex(index+1); }} disabled={index === responses.length - 1} className={`btn-circle transition-all shrink-0 ${index === responses.length - 1 ? 'opacity-10' : 'text-white bg-white/10 border border-white/20 shadow-sm active:scale-90 hover:bg-white/20'}`}><Lucide name="chevron-right" size={24} /></button></div>)}
+                    {/* 全画面時の閉じるボタン（右上） */}
+                    {isFullscreen && <button onClick={(e) => { e.stopPropagation(); document.exitFullscreen(); setIsFullscreen(false); }} className="absolute top-6 right-6 btn-circle bg-black/20 text-white backdrop-blur-md border border-white/10 z-[1000]"><Lucide name="x" size={24} /></button>}
                 </div>
             );
         }
