@@ -32,10 +32,6 @@
         .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
         
-        /* セーフエリア対応 */
-        .pt-safe { padding-top: env(safe-area-inset-top); }
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-        
         /* 固定サイズの正円ボタン */
         .btn-circle { 
             width: 44px !important; 
@@ -84,9 +80,12 @@
         .rounded-card { border-radius: 1rem !important; }
         
         /* カード内スクロールバーのカスタマイズ */
-        .custom-scrollbar::-webkit-scrollbar { width: 2px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+        
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .pt-safe { padding-top: env(safe-area-inset-top); }
     </style>
 </head>
 <body class="antialiased">
@@ -187,37 +186,79 @@
             const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
             const [loading, setLoading] = useState(true);
 
+            // --- 認証と初期化ロジックの改善 ---
             useEffect(() => {
+                let isMounted = true;
                 const initAuth = async () => {
-                    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-                    
-                    const params = new URLSearchParams(window.location.search);
-                    const surveyId = params.get('id');
+                    try {
+                        await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(e => console.warn("Persistence error", e));
+                        
+                        const unsubscribe = auth.onAuthStateChanged(async (u) => {
+                            if (!isMounted) return;
+                            
+                            const params = new URLSearchParams(window.location.search);
+                            const surveyId = params.get('id');
 
-                    auth.onAuthStateChanged(async (u) => {
-                        if (u) {
-                            setUser(u);
-                            if (surveyId) {
-                                const doc = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys').doc(surveyId).get();
-                                if (doc.exists) {
-                                    setCurrentSurvey({ id: doc.id, ...doc.data() });
-                                    setView('respond');
+                            if (u) {
+                                setUser(u);
+                                if (surveyId) {
+                                    // URLにIDがある場合はデータを取得して遷移
+                                    try {
+                                        const doc = await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys').doc(surveyId).get();
+                                        if (doc.exists) {
+                                            setCurrentSurvey({ id: doc.id, ...doc.data() });
+                                            setView('respond');
+                                        } else {
+                                            setView('home'); // アンケートがなければホームへ
+                                        }
+                                    } catch (e) {
+                                        console.error("Fetch error:", e);
+                                        setView('home');
+                                    }
                                 } else {
-                                    setView('home'); 
+                                    // 通常起動時
+                                    setView(prev => prev === 'loading' ? 'home' : prev);
                                 }
+                                setLoading(false);
                             } else {
-                                setView('home'); 
+                                // 未ログイン時
+                                if (surveyId) {
+                                    // アンケート回答の場合は匿名ログイン
+                                    await auth.signInAnonymously().catch(e => {
+                                        console.error("Auth failed:", e);
+                                        setLoading(false);
+                                        setView('login');
+                                    });
+                                } else {
+                                    setView('login');
+                                    setLoading(false);
+                                }
                             }
-                        } else {
-                            if (surveyId) {
-                                await auth.signInAnonymously();
-                            } else {
-                                setView('login'); 
-                            }
-                        }
-                    });
+                        });
+                        return unsubscribe;
+                    } catch (e) {
+                        console.error("Init error:", e);
+                        setLoading(false);
+                        setView('login');
+                    }
                 };
-                initAuth();
+
+                const unsubPromise = initAuth();
+
+                // タイムアウト処理: 5秒経ってもloadingなら強制解除
+                const timeout = setTimeout(() => {
+                    if (loading) {
+                        setLoading(false);
+                        // ユーザーがいなければログイン画面へ
+                        setView(v => v === 'loading' ? 'login' : v);
+                    }
+                }, 5000);
+
+                return () => {
+                    isMounted = false;
+                    clearTimeout(timeout);
+                    // アンサブスクライブ処理はPromiseで返る可能性があるため、ここでは簡易的に無視するか、厳密に行うならStateで管理
+                };
             }, []);
 
             useEffect(() => {
@@ -228,9 +269,11 @@
                     const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     setSurveys(data.filter(s => s.creatorId === user.uid).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
                 }, e => console.error("Survey Fetch Error:", e));
+
                 const unsubResponses = path.collection('responses').onSnapshot(snap => {
                     setResponses(snap.docs.map(d => ({ id: d.id, ...d.data() })));
                 }, e => console.error("Response Fetch Error:", e));
+
                 return () => { unsubSurveys(); unsubResponses(); };
             }, [user, appId]);
 
@@ -534,13 +577,12 @@
                 await onSubmit(answer, allowSns);
                 setSubmitted(true);
             };
-            
+            const theme = GRADIENTS.find(g => g.id === survey?.gradientId) || GRADIENTS[0];
+
             const handleCloseWindow = () => {
                 window.open('about:blank','_self').close();
                 setTimeout(() => alert("ブラウザのタブを閉じて終了してください"), 500);
             };
-
-            const theme = GRADIENTS.find(g => g.id === survey?.gradientId) || GRADIENTS[0];
 
             if (submitted) return (
                 <div className={`fixed inset-0 z-50 ${theme.class} flex flex-col items-center justify-center p-6 animate-in zoom-in-95 duration-500`}>
@@ -549,7 +591,7 @@
                         <h2 className="text-2xl font-black text-white tracking-tight mb-2 drop-shadow-md">Thank You!</h2>
                         <p className="text-white/80 text-xs font-bold leading-relaxed mb-10">回答ありがとうございました。</p>
                         {isPreview ? 
-                            <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all">管理画面に戻る</button> : 
+                            <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all">戻る</button> : 
                             <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all">画面を閉じる</button>
                         }
                     </div>
