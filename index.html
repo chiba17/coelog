@@ -34,7 +34,7 @@
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         .pt-safe { padding-top: env(safe-area-inset-top); }
-
+        
         /* 固定サイズの正円ボタン */
         .icon-btn-circle {
             width: 44px !important;
@@ -66,7 +66,7 @@
             font-size: 14px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-
+        
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
@@ -130,6 +130,7 @@
             return <span ref={iconRef} className={`inline-flex items-center justify-center shrink-0 aspect-square ${className}`}></span>;
         };
 
+        // --- Long Press Hook ---
         const useLongPress = (callback = () => {}, ms = 800) => {
             const [startLongPress, setStartLongPress] = useState(false);
             useEffect(() => {
@@ -164,8 +165,12 @@
                             <p className="text-sm text-slate-500 font-bold leading-relaxed">{message}</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <button onClick={onConfirm} className={`w-full py-3.5 rounded-2xl font-black text-sm transition-all active:scale-95 ${isDanger ? 'bg-pink-500 text-white shadow-lg' : 'bg-indigo-500 text-white shadow-lg'}`}>{confirmText}</button>
-                            <button onClick={onCancel} className="w-full py-3.5 rounded-2xl font-black text-sm text-slate-400">{cancelText}</button>
+                            <button onClick={onConfirm} className={`w-full py-3.5 rounded-2xl font-black text-sm transition-all active:scale-95 ${isDanger ? 'bg-pink-500 text-white shadow-lg' : 'bg-indigo-500 text-white shadow-lg'}`}>
+                                {confirmText}
+                            </button>
+                            <button onClick={onCancel} className="w-full py-3.5 rounded-2xl font-black text-sm text-slate-400">
+                                {cancelText}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -223,10 +228,10 @@
                 const unsubSurveys = path.collection('surveys').onSnapshot(snap => {
                     const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     setSurveys(data.filter(s => s.creatorId === user.uid).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
-                }, e => console.error("Survey Error", e));
+                }, e => console.error("Survey Fetch Error:", e));
                 const unsubResponses = path.collection('responses').onSnapshot(snap => {
                     setResponses(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-                }, e => console.error("Response Error", e));
+                }, e => console.error("Response Fetch Error:", e));
                 return () => { unsubSurveys(); unsubResponses(); };
             }, [user, appId]);
 
@@ -276,6 +281,7 @@
                     const cleanData = {};
                     Object.keys(data).forEach(key => { if(data[key] !== undefined) cleanData[key] = data[key]; });
                     const ref = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys');
+                    
                     if (id) {
                         await ref.doc(id).update(cleanData);
                         showToast("更新しました");
@@ -495,7 +501,7 @@
             
             return (
                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-400 pb-24">
-                    <header className="flex items-center justify-between py-1"><button onClick={onBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
+                    <header className="flex items-center justify-between py-1"><button onClick={onBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="icon-btn-circle text-indigo-600 bg-white shadow-sm border-visible border-indigo-200 active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
                     <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button><button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
                     <section className="space-y-4"><div className="flex justify-between items-center px-2 text-[10px] font-black text-slate-500 uppercase tracking-widest"><h3>最近の回答</h3><button onClick={() => setShowDeleteConfirm(true)} className="text-pink-500 flex items-center gap-1"><Lucide name="trash-2" size={11} /> 削除</button></div>
                         <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => {
@@ -561,9 +567,9 @@
             return (
                 <div className={`fixed inset-0 z-50 ${theme.class} flex flex-col items-center justify-center p-4 animate-in fade-in duration-500`}>
                     <div className="relative w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-full" style={{ maxHeight: '90vh' }}>
-                        <header className="flex items-center justify-center relative p-4 border-b border-white/10 shrink-0">
-                            {isPreview && <button onClick={onBack} className="absolute left-4 icon-btn-circle text-white bg-white/20 hover:bg-white/30 transition-all z-20"><Lucide name="arrow-left" size={20} /></button>}
-                            <h1 className="text-sm font-black text-white tracking-wider uppercase opacity-80 truncate px-12">{survey.title}</h1>
+                        <header className="flex items-center justify-center relative p-4 border-b border-white/10 shrink-0 min-h-[60px]">
+                            {isPreview && <button onClick={onBack} className="absolute left-4 top-1/2 -translate-y-1/2 icon-btn-circle text-white bg-white/20 hover:bg-white/30 transition-all z-50"><Lucide name="arrow-left" size={20} /></button>}
+                            <h1 className="text-sm font-black text-white tracking-wider uppercase opacity-80 truncate px-16 w-full text-center">{survey.title}</h1>
                         </header>
 
                         <div className="overflow-y-auto p-6 flex flex-col items-center custom-scrollbar w-full">
@@ -608,15 +614,7 @@
             if (!response) return null;
             const activeSurvey = survey || surveys.find(s => s.id === response.surveyId);
             const theme = GRADIENTS.find(g => g.id === activeSurvey?.gradientId) || GRADIENTS[0];
-            const getFontSize = (text) => {
-                const len = text.length;
-                if (len < 20) return 'text-4xl leading-snug';
-                if (len < 40) return 'text-3xl leading-snug';
-                if (len < 80) return 'text-2xl leading-normal';
-                if (len < 100) return 'text-xl leading-relaxed';
-                return 'text-lg leading-relaxed';
-            };
-            
+            const getFontSize = (text) => text.length < 20 ? 'text-4xl' : text.length < 40 ? 'text-3xl' : text.length < 80 ? 'text-2xl' : 'text-xl';
             return (
                 <div className={`fixed inset-0 z-[100] ${theme.class} flex flex-col h-full w-full animate-in fade-in duration-300`}>
                     <div className="absolute top-0 left-0 w-full p-4 pt-safe z-20 flex justify-end items-center pointer-events-none">
@@ -632,7 +630,7 @@
                                 </div>
                                 <div className="flex-1 flex flex-col justify-center items-center p-6 overflow-hidden relative">
                                     <div className="w-full border-b border-white/20 pb-4 mb-6">{activeSurvey && <div className="text-white/90 text-sm font-bold leading-relaxed text-center">"{activeSurvey.question}"</div>}</div>
-                                    <div className={`w-full text-center text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`}>"{response.answer}"</div>
+                                    <div className={`w-full text-center text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`} style={{ lineHeight: '1.6' }}>"{response.answer}"</div>
                                     {!response.allowSns && <div className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-pink-500/50 rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shadow-lg"><Lucide name="lock" size={10} /> SNS不可</div>}
                                 </div>
                             </div>
