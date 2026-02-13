@@ -17,7 +17,7 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Firebase SDK (Compat versions for stability) -->
+    <!-- Firebase SDK (Compat versions) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -34,28 +34,18 @@
         .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
 
-        @keyframes popIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            60% { transform: scale(1.1); opacity: 1; }
+        /* スムースな出現アニメーション（修正済み） */
+        @keyframes scaleIn {
+            0% { transform: scale(0.9); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .animate-pop-in { animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-
-        @keyframes slideUpFade {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .animate-slide-up { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-scale-in { animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
         @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
+            50% { transform: translateY(-5px); }
         }
         .animate-float { animation: float 3s ease-in-out infinite; }
-        
-        .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
 
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         .pt-safe { padding-top: env(safe-area-inset-top); }
@@ -157,7 +147,6 @@
             return <span ref={iconRef} className={`inline-flex items-center justify-center shrink-0 aspect-square ${className}`}></span>;
         };
 
-        // --- Long Press Hook ---
         const useLongPress = (callback = () => {}, ms = 800) => {
             const [startLongPress, setStartLongPress] = useState(false);
             useEffect(() => {
@@ -270,7 +259,11 @@
                     setView('home');
                 } catch (e) {
                     console.error(e);
-                    showToast("ログイン失敗");
+                    if (e.code === 'auth/unauthorized-domain') {
+                        alert("エラー: 許可されていないドメインです。Firebase Consoleで設定を確認してください。");
+                    } else {
+                        showToast("ログイン失敗");
+                    }
                 }
             };
 
@@ -306,6 +299,7 @@
                     const cleanData = {};
                     Object.keys(data).forEach(key => { if(data[key] !== undefined) cleanData[key] = data[key]; });
                     const ref = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys');
+                    
                     if (id) {
                         await ref.doc(id).update(cleanData);
                         showToast("更新しました");
@@ -353,7 +347,11 @@
             };
 
             const currentResponses = useMemo(() => responses.filter(r => r.surveyId === currentSurvey?.id).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)), [responses, currentSurvey]);
-            const favoriteResponses = useMemo(() => responses.filter(r => r.liked), [responses]);
+            
+            const favoriteResponses = useMemo(() => {
+                // アンケートが存在するもののみ表示
+                return responses.filter(r => r.liked && surveys.some(s => s.id === r.surveyId));
+            }, [responses, surveys]);
 
             const navigate = (v, d = null, i = 0, isPreview = false) => {
                 setIsPreviewMode(isPreview);
@@ -372,7 +370,7 @@
                     {view === 'favorites' && <FavoritesView responses={favoriteResponses} surveys={surveys} onNavigate={navigate} onBack={() => setView('home')} onToggleLike={toggleLike} />}
                     {(view === 'create' || view === 'edit') && <SurveyFormView initialData={view === 'edit' ? currentSurvey : null} onSave={handleSaveSurvey} onBack={() => setView(view === 'edit' ? 'stats' : 'home')} />}
                     {view === 'respond' && <RespondView survey={currentSurvey} onSubmit={handleAddResponse} onBack={() => setView('stats')} isPreview={isPreviewMode} />}
-                    {view === 'stats' && <StatsView survey={currentSurvey} responses={currentResponses} onNavigate={(v, d, i) => { setSelectedResponseIndex(i); navigate(v, d); }} onBack={() => setView('home')} onDelete={handleDeleteSurvey} onDeleteResponse={handleDeleteResponse} onToggleLike={toggleLike} onCopy={handleCopyURL} />}
+                    {view === 'stats' && <StatsView survey={currentSurvey} responses={currentResponses} onNavigate={(v, d, i, p) => navigate(v, d, i, p)} onBack={() => setView('home')} onDelete={handleDeleteSurvey} onDeleteResponse={handleDeleteResponse} onToggleLike={toggleLike} onCopy={handleCopyURL} />}
                     {view === 'share' && <ResponseGallery responses={currentSurvey ? currentResponses : favoriteResponses} initialIndex={selectedResponseIndex} survey={currentSurvey} surveys={surveys} onClose={() => setView(currentSurvey ? 'stats' : 'favorites')} />}
 
                     {notification && (
@@ -478,7 +476,8 @@
                                             <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{s?.title || "テーマ不明"}</span>
                                             <span className="text-[10px] font-bold text-slate-400">{formatDateTime(res.createdAt)}</span>
                                         </div>
-                                        <button onClick={e => { e.stopPropagation(); onToggleLike(res.id); }} className="icon-btn-circle !w-8 !h-8 !min-w-8 transition-all bg-pink-50 text-pink-500"><Lucide name="heart" size={18} fill="currentColor" /></button>
+                                        {/* お気に入り解除ボタン（縦伸び防止のため shrink-0 を適用） */}
+                                        <button onClick={e => { e.stopPropagation(); onToggleLike(res.id); }} className="icon-btn-circle bg-pink-50 text-pink-500 shrink-0"><Lucide name="heart" size={18} fill="currentColor" /></button>
                                     </div>
                                     <p className="font-bold text-slate-800 italic text-sm leading-relaxed break-words line-clamp-3">"{res.answer}"</p>
                                 </div>
@@ -528,7 +527,7 @@
             );
         }
 
-        // クラッシュ防止のため、リストアイテムを別コンポーネント化
+        // --- リスト項目のコンポーネント化（クラッシュ防止） ---
         const ResponseItem = ({ res, survey, index, length, onNavigate, onToggleLike, setDeleteResId }) => {
             const longPressProps = useLongPress(() => setDeleteResId(res.id), 800);
             return (
@@ -562,7 +561,9 @@
             return (
                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-400 pb-24">
                     <header className="flex items-center justify-between py-1"><button onClick={onBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
-                    <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button><button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
+                    <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button>
+                    {/* ここを修正：第4引数 isPreview に true を渡す */}
+                    <button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
                     <section className="space-y-4"><div className="flex justify-between items-center px-2 text-[10px] font-black text-slate-500 uppercase tracking-widest"><h3>最近の回答</h3><button onClick={() => setShowDeleteConfirm(true)} className="text-pink-500 flex items-center gap-1"><Lucide name="trash-2" size={11} /> 削除</button></div>
                         <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => (
                             <ResponseItem 
@@ -604,11 +605,11 @@
                 <div className={`fixed inset-0 z-50 ${theme.class} flex flex-col items-center justify-center p-6 animate-in zoom-in-95 duration-500`}>
                     <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-10 shadow-2xl w-full max-w-sm text-center animate-scale-in">
                         <div className="w-20 h-20 bg-white text-indigo-500 rounded-full flex items-center justify-center shadow-lg mb-6 mx-auto animate-float"><Lucide name="check" size={36} strokeWidth={4} /></div>
-                        <h2 className="text-2xl font-black text-white tracking-tight mb-2 drop-shadow-md animate-slide-up delay-100">Thank You!</h2>
-                        <p className="text-white/80 text-sm font-bold leading-relaxed mb-10 animate-slide-up delay-200">回答ありがとうございました。</p>
+                        <h2 className="text-2xl font-black text-white tracking-tight mb-2 drop-shadow-md animate-scale-in delay-100">Thank You!</h2>
+                        <p className="text-white/80 text-sm font-bold leading-relaxed mb-10 animate-scale-in delay-200">回答ありがとうございました。</p>
                         {isPreview ? 
-                            <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all hover:shadow-2xl animate-slide-up delay-300">回答一覧に戻る</button> : 
-                            <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95 animate-slide-up delay-300">画面を閉じる</button>
+                            <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all hover:shadow-2xl animate-scale-in delay-300">回答一覧に戻る</button> : 
+                            <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95 animate-scale-in delay-300">画面を閉じる</button>
                         }
                     </div>
                 </div>
@@ -618,7 +619,8 @@
                 <div className={`fixed inset-0 z-50 ${theme.class} flex flex-col items-center justify-center p-4 animate-in fade-in duration-500`}>
                     <div className="relative w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-full" style={{ maxHeight: '90vh' }}>
                         <header className="flex items-center justify-center relative p-4 border-b border-white/10 shrink-0">
-                            {isPreview && <button onClick={onBack} className="absolute left-4 top-1/2 -translate-y-1/2 icon-btn-circle text-white bg-white/20 hover:bg-white/30 transition-all z-20"><Lucide name="arrow-left" size={20} /></button>}
+                            {/* 修正: 戻るボタンの表示条件（isPreview）と前面配置（z-50） */}
+                            {isPreview && <button onClick={onBack} className="absolute left-4 top-1/2 -translate-y-1/2 icon-btn-circle text-white bg-white/20 hover:bg-white/30 transition-all z-50"><Lucide name="arrow-left" size={20} /></button>}
                             <h1 className="text-sm font-black text-white tracking-wider uppercase opacity-80 truncate px-12">{survey.title}</h1>
                         </header>
 
