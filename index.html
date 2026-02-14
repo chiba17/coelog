@@ -551,10 +551,10 @@
                         <h2 className="font-black text-sm text-slate-900">{isEdit ? '内容を編集' : '新しく作る'}</h2><div className="w-11 h-11 shrink-0" />
                     </header>
                     {/* 修正：枠線をborder-slate-200（うっすら）に変更、影の調整 */}
-                    <div className="bg-white border border-slate-200 rounded-[2.2rem] p-6 shadow-sm space-y-6">
-                        <div className="space-y-2"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">アンケート名</label><input type="text" placeholder="例：次回のテーマについて" className="w-full bg-transparent border-b-2 border-slate-200 focus:border-indigo-400 outline-none py-1.5 text-xl font-bold transition-all placeholder:text-slate-300" value={title} onChange={e => setTitle(e.target.value)} /></div>
+                    <div className="bg-white border border-slate-200 rounded-[2.2rem] p-6 shadow-sm space-y-5">
+                        <div className="space-y-2"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">アンケート名</label><input type="text" placeholder="例：次回のテーマについて" className="w-full bg-transparent border-b-2 border-slate-200 focus:border-indigo-400 outline-none py-1.2 text-xl font-bold transition-all placeholder:text-slate-300" value={title} onChange={e => setTitle(e.target.value)} /></div>
                         <div className="space-y-2"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">質問の内容</label><textarea placeholder="聞きたいことをひとつだけ" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold focus:bg-white focus:border-indigo-400 outline-none transition-all resize-none h-32" value={question} onChange={e => setQuestion(e.target.value)} /></div>
-                        <div className="space-y-3 pt-1"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">デザイン</label><div className="flex flex-wrap gap-3 px-1">{GRADIENTS.map(g => (
+                        <div className="space-y-3"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">デザイン</label><div className="flex flex-wrap gap-3 px-1">{GRADIENTS.map(g => (
                             <button key={g.id} onClick={() => setGradientId(g.id)} className={`w-9 h-9 rounded-full transition-all relative ${g.class} ${gradientId === g.id ? 'scale-110 ring-4 ring-indigo-50 shadow-md' : 'hover:scale-105'}`}>
                                 {gradientId === g.id && <Lucide name="check" size={14} className="text-white mx-auto drop-shadow-md" />}
                             </button>
