@@ -1,124 +1,4 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>coelog</title>
-    
-    <!-- CSS & Fonts -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
-    
-    <!-- React & Babel -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Firebase SDK (Compat versions for stability) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
-    <style>
-        body { 
-            font-family: 'Noto Sans JP', sans-serif; 
-            -webkit-tap-highlight-color: transparent; 
-            background-color: #fcfdff;
-            color: #1e293b;
-            user-select: none;
-        }
-        
-        .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-
-        /* 修正: バウンス（popIn）を削除し、下記の gentleScale を使用 */
-        @keyframes gentleScale {
-            0% { transform: scale(0.96); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-gentle-scale { animation: gentleScale 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-
-        @keyframes slideUpFade {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .animate-slide-up { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-        /* 修正: チラつき防止のため、移動を伴わないフェードインを使用 */
-        @keyframes simpleFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .animate-simple-fade-in { animation: simpleFadeIn 0.8s ease-out forwards; }
-        
-        /* 【追加】ギャラリー表示用のこだわりのアニメーション */
-        @keyframes zoomInUp {
-            0% { opacity: 0; transform: scale(0.92) translateY(15px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .animate-zoom-in-up { animation: zoomInUp 0.45s cubic-bezier(0.2, 0.9, 0.2, 1) forwards; will-change: transform, opacity; }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
-        }
-        .animate-float { animation: float 3s ease-in-out infinite; }
-        
-        .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
-
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-        .pt-safe { padding-top: env(safe-area-inset-top); }
-        
-        /* 固定サイズの正円ボタン */
-        .icon-btn-circle {
-            width: 44px !important;
-            height: 44px !important;
-            min-width: 44px !important;
-            min-height: 44px !important;
-            display: flex !important; 
-            align-items: center !important; 
-            justify-content: center !important; 
-            flex-shrink: 0 !important; 
-            border-radius: 9999px !important;
-            padding: 0 !important;
-        }
-
-        .border-visible { border: 1.5px solid #cbd5e1 !important; }
-        .border-visible:focus-within { border-color: #818cf8 !important; }
-        .rounded-card { border-radius: 1rem !important; }
-
-        .google-btn {
-            background-color: white;
-            border: 1px solid #cbd5e1;
-            color: #334155;
-            font-weight: 700;
-            padding: 10px 20px;
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
-        
-        .no-callout { -webkit-touch-callout: none; }
-        .allow-select { user-select: text; -webkit-user-select: text; }
-    </style>
-</head>
-<body class="antialiased">
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const { useState, useEffect, useMemo, useRef } = React;
+const { useState, useEffect, useMemo, useRef } = React;
 
         // --- Firebase Configuration ---
         const getFirebaseConfig = () => {
@@ -425,7 +305,7 @@
 
                     {['home', 'stats', 'favorites'].includes(view) && (
                         <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-auto bg-white/95 border border-slate-300 shadow-[0_15px_40px_rgba(0,0,0,0.08)] rounded-full flex items-center p-2 z-[100]">
-                            <button onClick={() => navigate('home')} className={`icon-btn-circle transition-all ${view === 'home' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
+                            <button onClick={() => navigate('home')} className={`icon-btn-circle transition-all ${view === 'home' ? 'bg-indigo-50 text-white shadow-md' : 'text-slate-400'}`}>
                                 <Lucide name="layout" size={20} />
                             </button>
                             <div className="w-4 shrink-0" />
@@ -632,8 +512,8 @@
             };
             
             const handleCloseWindow = () => {
-                window.open('about:blank','_self').close();
-                setTimeout(() => alert("ブラウザのタブを閉じて終了してください"), 500);
+                window.close();
+                alert("回答ありがとうございました。ブラウザを閉じて終了してください。");
             };
 
             const theme = GRADIENTS.find(g => g.id === survey?.gradientId) || GRADIENTS[0];
@@ -646,7 +526,7 @@
                         <p className="text-white/80 text-sm font-bold leading-relaxed mb-10 animate-simple-fade-in delay-200" style={{animationFillMode:'both'}}>回答ありがとうございました。</p>
                         {isPreview ? 
                             <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all hover:shadow-2xl animate-simple-fade-in delay-300" style={{animationFillMode:'both'}}>回答一覧に戻る</button> : 
-                            <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95 animate-simple-fade-in delay-300" style={{animationFillMode:'both'}}>画面を閉じる</button>
+                            <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95 animate-simple-fade-in delay-300" style={{animationFillMode:'both'}}>ブラウザを閉じて終了</button>
                         }
                     </div>
                 </div>
