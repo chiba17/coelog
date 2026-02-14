@@ -1,4 +1,116 @@
-const { useState, useEffect, useMemo, useRef } = React;
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>coelog</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body { 
+            font-family: 'Noto Sans JP', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+            background-color: #fcfdff;
+            color: #1e293b;
+            user-select: none;
+        }
+        
+        .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+
+        @keyframes gentleScale {
+            0% { transform: scale(0.96); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-gentle-scale { animation: gentleScale 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+        @keyframes slideUpFade {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes simpleFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-simple-fade-in { animation: simpleFadeIn 0.8s ease-out forwards; }
+        
+        @keyframes zoomInUp {
+            0% { opacity: 0; transform: scale(0.92) translateY(15px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-zoom-in-up { animation: zoomInUp 0.45s cubic-bezier(0.2, 0.9, 0.2, 1) forwards; will-change: transform, opacity; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .pt-safe { padding-top: env(safe-area-inset-top); }
+        
+        .icon-btn-circle {
+            width: 44px !important;
+            height: 44px !important;
+            min-width: 44px !important;
+            min-height: 44px !important;
+            display: flex !important; 
+            align-items: center !important; 
+            justify-content: center !important; 
+            flex-shrink: 0 !important; 
+            border-radius: 9999px !important;
+            padding: 0 !important;
+        }
+
+        .border-visible { border: 1.5px solid #cbd5e1 !important; }
+        .border-visible:focus-within { border-color: #818cf8 !important; }
+        .rounded-card { border-radius: 1rem !important; }
+
+        .google-btn {
+            background-color: white;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+        
+        .no-callout { -webkit-touch-callout: none; }
+        .allow-select { user-select: text; -webkit-user-select: text; }
+    </style>
+</head>
+<body class="antialiased">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
 
         // --- Firebase Configuration ---
         const getFirebaseConfig = () => {
@@ -422,7 +534,6 @@ const { useState, useEffect, useMemo, useRef } = React;
                         <button onClick={handleBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button>
                         <h2 className="font-black text-sm text-slate-900">{isEdit ? '内容を編集' : '新しく作る'}</h2><div className="w-11 h-11 shrink-0" />
                     </header>
-                    {/* 修正：枠線をborder-slate-200（うっすら）に変更、影の調整 */}
                     <div className="bg-white border border-slate-200 rounded-[2.2rem] p-6 shadow-sm space-y-5">
                         <div className="space-y-1.2"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">アンケート名</label><input type="text" placeholder="例：次回のテーマについて" className="w-full bg-transparent border-b-2 border-slate-200 focus:border-indigo-400 outline-none py-1.5 text-xl font-bold transition-all placeholder:text-slate-300" value={title} onChange={e => setTitle(e.target.value)} /></div>
                         <div className="space-y-2"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">質問の内容</label><textarea placeholder="聞きたいことをひとつだけ" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold focus:bg-white focus:border-indigo-400 outline-none transition-all resize-none h-32" value={question} onChange={e => setQuestion(e.target.value)} /></div>
@@ -432,7 +543,6 @@ const { useState, useEffect, useMemo, useRef } = React;
                             </button>
                         ))}</div></div>
                     </div>
-                    {/* 修正：保存ボタンをカード内に移動（HTML構造上はコンテナ外だが、配置として調整） */}
                     <div className="flex flex-col items-center gap-4 pt-4">
                         <button onClick={() => onSave({ id: initialData?.id, title, question, gradientId })} disabled={!title || !question} className={`px-12 py-4 h-14 rounded-full font-black text-lg text-white shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all ${!title || !question ? 'bg-slate-300 shadow-none' : 'bg-gradient-to-r from-indigo-500 to-purple-500 shadow-xl shadow-indigo-100'}`}>
                             {isEdit ? '変更を保存する' : 'アンケートを公開'} <Lucide name="send" size={20} />
@@ -472,14 +582,12 @@ const { useState, useEffect, useMemo, useRef } = React;
             const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
             const [deleteResId, setDeleteResId] = useState(null);
             
-            const bindLongPress = (id) => useLongPress(() => setDeleteResId(id), 800);
             const theme = GRADIENTS.find(g => g.id === survey?.gradientId) || GRADIENTS[0];
             
             return (
                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-400 pb-24">
                     <header className="flex items-center justify-between py-1"><button onClick={onBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
                     <div className={`${theme.class} rounded-3xl py-4 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden animate-simple-fade-in`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button>
-                    {/* 修正：プレビュー用フラグ(true)を確実に渡す */}
                     <button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
                     <section className="space-y-4"><div className="flex justify-between items-center px-2 text-[10px] font-black text-slate-500 uppercase tracking-widest"><h3>最近の回答</h3><button onClick={() => setShowDeleteConfirm(true)} className="text-pink-500 flex items-center gap-1"><Lucide name="trash-2" size={11} /> 削除</button></div>
                         <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => (
@@ -542,7 +650,6 @@ const { useState, useEffect, useMemo, useRef } = React;
 
                         <div className="overflow-y-auto p-6 flex flex-col items-center custom-scrollbar w-full">
                             <div className="text-center w-full mb-8">
-                                {/* 引用符削除済み */}
                                 <p className="text-xl font-black text-white leading-snug italic drop-shadow-md">{survey.question}</p>
                             </div>
 
@@ -597,7 +704,6 @@ const { useState, useEffect, useMemo, useRef } = React;
             return (
                 <div onClick={handleTap} className={`fixed inset-0 z-[100] ${theme.class} flex flex-col h-full w-full animate-in fade-in duration-300 cursor-pointer`}>
                     <div className="absolute top-0 left-0 w-full p-4 pt-safe z-20 flex justify-end items-center pointer-events-none">
-                        {/* 修正: 閉じるボタンのデザイン変更（背景なし、枠なし、影なし） */}
                         <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="pointer-events-auto w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/80 transition-colors"><Lucide name="x" size={24} /></button>
                     </div>
                     <div className="flex-1 flex flex-col items-center justify-center p-6 min-h-0 relative">
@@ -609,7 +715,6 @@ const { useState, useEffect, useMemo, useRef } = React;
                                     <h1 className="text-white text-xl font-black leading-tight drop-shadow-md mb-2">{activeSurvey?.title || "お気に入り"}</h1>
                                 </div>
                                 <div className="flex-1 flex flex-col justify-center items-center p-6 overflow-hidden relative">
-                                    {/* 修正: 引用符削除 */}
                                     <div className="w-full border-b border-white/20 pb-4 mb-6">{activeSurvey && <div className="text-white/90 text-sm font-bold leading-relaxed text-center">{activeSurvey.question}</div>}</div>
                                     <div className={`w-full text-center text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`}>{response.answer}</div>
                                     {!response.allowSns && <div className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-pink-500/50 rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shadow-lg"><Lucide name="lock" size={10} /> SNS不可</div>}
