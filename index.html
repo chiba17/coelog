@@ -134,12 +134,11 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'coelog-718ad';
 
         const MAX_ANSWER_LENGTH = 140;
-        // --- 修正: グラデーション定義の更新 (ナチュラルでスムースなカラー) ---
         const GRADIENTS = [
             { id: 'purple', name: '藤 - Fuji', class: 'bg-gradient-to-br from-indigo-400 via-purple-400 to-fuchsia-400 text-white' },
             { id: 'sunset', name: '茜 - Akane', class: 'bg-gradient-to-br from-rose-400 via-red-400 to-orange-400 text-white' },
             { id: 'ocean', name: '浅葱 - Asagi', class: 'bg-gradient-to-br from-cyan-400 via-sky-500 to-blue-500 text-white' },
-            { id: 'nature', name: '常盤 - Tokiwa', class: 'bg-gradient-to-br from-emerald-400 via-teal-500 to-green-600 text-white' },
+            { id: 'nature', name: '常盤 - Tokiwa', class: 'bg-gradient-to-br from-emerald-500 via-green-600 to-teal-700 text-white' },
             { id: 'midnight', name: '群青 - Gunjo', class: 'bg-gradient-to-br from-indigo-500 via-violet-600 to-purple-700 text-white' },
             { id: 'morning', name: '琥珀 - Kohaku', class: 'bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 text-white' },
         ];
@@ -547,7 +546,6 @@
             );
         }
 
-        // --- 修正: opacity-0 削除 ---
         const ResponseItem = ({ res, survey, index, length, onNavigate, onToggleLike, setDeleteResId }) => {
             const longPressProps = useLongPress(() => setDeleteResId(res.id), 800);
             return (
@@ -555,7 +553,7 @@
                     onClick={() => onNavigate('share', survey, index)}
                     {...longPressProps}
                     onContextMenu={(e) => { e.preventDefault(); setDeleteResId(res.id); }}
-                    className={`bg-white border-visible p-5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] select-none no-callout animate-simple-fade-in ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}
+                    className={`bg-white border-visible p-5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] select-none no-callout animate-simple-fade-in opacity-0 ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}
                     style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'forwards' }}
                 >
                     <div className="flex items-start justify-between pointer-events-none">
@@ -584,6 +582,7 @@
                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-400 pb-24">
                     <header className="flex items-center justify-between py-1"><button onClick={onBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
                     <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden animate-simple-fade-in`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button>
+                    {/* 修正：プレビュー用フラグ(true)を確実に渡す */}
                     <button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
                     <section className="space-y-4"><div className="flex justify-between items-center px-2 text-[10px] font-black text-slate-500 uppercase tracking-widest"><h3>最近の回答</h3><button onClick={() => setShowDeleteConfirm(true)} className="text-pink-500 flex items-center gap-1"><Lucide name="trash-2" size={11} /> 削除</button></div>
                         <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => (
@@ -688,11 +687,21 @@
             const activeSurvey = survey || surveys.find(s => s.id === response.surveyId);
             const theme = GRADIENTS.find(g => g.id === activeSurvey?.gradientId) || GRADIENTS[0];
             const getFontSize = (text) => text.length < 20 ? 'text-4xl' : text.length < 40 ? 'text-3xl' : text.length < 80 ? 'text-2xl' : 'text-xl';
+            
+            // タップ遷移ロジック
+            const handleTap = () => {
+                if (index < responses.length - 1) {
+                    setIndex(index + 1);
+                } else {
+                    onClose();
+                }
+            };
+
             return (
-                <div className={`fixed inset-0 z-[100] ${theme.class} flex flex-col h-full w-full animate-in fade-in duration-300`}>
+                <div onClick={handleTap} className={`fixed inset-0 z-[100] ${theme.class} flex flex-col h-full w-full animate-in fade-in duration-300 cursor-pointer`}>
                     <div className="absolute top-0 left-0 w-full p-4 pt-safe z-20 flex justify-end items-center pointer-events-none">
                         {/* 修正: 閉じるボタンのデザイン変更（背景なし、枠なし、影なし） */}
-                        <button onClick={onClose} className="pointer-events-auto w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/80 transition-colors"><Lucide name="x" size={24} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="pointer-events-auto w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/80 transition-colors"><Lucide name="x" size={24} /></button>
                     </div>
                     <div className="flex-1 flex flex-col items-center justify-center p-6 min-h-0 relative">
                         <div className="absolute -top-20 -left-20 w-[300px] h-[300px] bg-white/20 rounded-full blur-[80px]" /><div className="absolute bottom-0 right-0 w-[200px] h-[200px] bg-white/10 rounded-full blur-[60px]" />
@@ -705,7 +714,7 @@
                                 <div className="flex-1 flex flex-col justify-center items-center p-6 overflow-hidden relative">
                                     {/* 修正: 引用符削除 */}
                                     <div className="w-full border-b border-white/20 pb-4 mb-6">{activeSurvey && <div className="text-white/90 text-sm font-bold leading-relaxed text-center">{activeSurvey.question}</div>}</div>
-                                    <div className={`w-full text-center text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`}>"{response.answer}"</div>
+                                    <div className={`w-full text-center text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`}>{response.answer}</div>
                                     {!response.allowSns && <div className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-pink-500/50 rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shadow-lg"><Lucide name="lock" size={10} /> SNS不可</div>}
                                 </div>
                             </div>
