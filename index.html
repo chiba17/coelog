@@ -677,8 +677,8 @@
             const getFontSize = (text) => text.length < 20 ? 'text-4xl' : text.length < 40 ? 'text-3xl' : text.length < 80 ? 'text-2xl' : 'text-xl';
             return (
                 <div className={`fixed inset-0 z-[100] ${theme.class} flex flex-col h-full w-full animate-in fade-in duration-300`}>
-                    <div className="absolute top-0 left-0 w-full p-4 pt-safe z-20 flex justify-end items-center pointer-events-none">
-                        <button onClick={onClose} className="pointer-events-auto w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md active:scale-95 transition-all shadow-sm"><Lucide name="x" size={18} /></button>
+                    <div className="absolute top-0 left-0 w-full p-6 pt-safe z-20 flex justify-end items-center pointer-events-none">
+                        <button onClick={onClose} className="pointer-events-auto w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/80 transition-colors"><Lucide name="x" size={24} /></button>
                     </div>
                     <div className="flex-1 flex flex-col items-center justify-center p-6 min-h-0 relative">
                         <div className="absolute -top-20 -left-20 w-[300px] h-[300px] bg-white/20 rounded-full blur-[80px]" /><div className="absolute bottom-0 right-0 w-[200px] h-[200px] bg-white/10 rounded-full blur-[60px]" />
@@ -689,7 +689,7 @@
                                     <h1 className="text-white text-xl font-black leading-tight drop-shadow-md mb-2">{activeSurvey?.title || "お気に入り"}</h1>
                                 </div>
                                 <div className="flex-1 flex flex-col justify-center items-center p-6 overflow-hidden relative">
-                                    <div className="w-full border-b border-white/20 pb-4 mb-6">{activeSurvey && <div className="text-white/90 text-sm font-bold leading-relaxed text-center">{activeSurvey.question}</div>}</div>
+                                    <div className="w-full border-b border-white/20 pb-4 mb-6">{activeSurvey && <div className="text-white/90 text-sm font-bold leading-relaxed text-center">"{activeSurvey.question}"</div>}</div>
                                     <div className={`w-full text-center text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`}>"{response.answer}"</div>
                                     {!response.allowSns && <div className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-pink-500/50 rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shadow-lg"><Lucide name="lock" size={10} /> SNS不可</div>}
                                 </div>
