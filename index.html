@@ -417,7 +417,7 @@
 
                     {['home', 'stats', 'favorites'].includes(view) && (
                         <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-auto bg-white/95 border border-slate-300 shadow-[0_15px_40px_rgba(0,0,0,0.08)] rounded-full flex items-center p-2 z-[100]">
-                            <button onClick={() => navigate('home')} className={`icon-btn-circle transition-all ${view === 'home' ? 'bg-indigo-50 text-white shadow-md' : 'text-slate-400'}`}>
+                            <button onClick={() => navigate('home')} className={`icon-btn-circle transition-all ${view === 'home' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
                                 <Lucide name="layout" size={20} />
                             </button>
                             <div className="w-4 shrink-0" />
@@ -474,8 +474,8 @@
                         ) : surveys.map(s => (
                             <button key={s.id} onClick={() => onNavigate('stats', s)} className="bg-white border-visible p-4 rounded-card text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
                                 <div className="space-y-3">
-                                    <div className="flex justify-between items-center text-slate-400 font-black text-[9px]"><div className="p-1.5 bg-indigo-50 text-indigo-500 rounded-xl"><Lucide name="message-circle" size={14} /></div><span className="flex items-center gap-1"><Lucide name="clock" size={10} /> {formatDateTime(s.createdAt)}</span></div>
-                                    <div><h3 className="font-bold text-lg text-slate-800 leading-tight">{s.title}</h3><p className="text-xs text-slate-400 line-clamp-1 italic mt-1">"{s.question}"</p></div>
+                                    <div className="flex justify-between items-center text-slate-400 font-black text-[9px]"><div className="p-1.5 bg-indigo-50 text-indigo-500 rounded-full"><Lucide name="message-circle" size={14} /></div><span className="flex items-center gap-1"><Lucide name="clock" size={10} /> {formatDateTime(s.createdAt)}</span></div>
+                                    <div><h3 className="font-bold text-lg text-slate-800 leading-tight">{s.title}</h3><p className="text-xs text-slate-400 line-clamp-1 italic mt-1">{s.question}</p></div>
                                 </div>
                             </button>
                         ))}
@@ -571,7 +571,7 @@
                                 {!res.allowSns && <span className="text-[8px] font-black text-pink-400 uppercase tracking-tighter shrink-0 border border-pink-100 px-1.5 py-0.5 rounded-full">SNS不可</span>}
                             </div>
                         </div>
-                        <button onClick={e => { e.stopPropagation(); onToggleLike(res.id); }} className={`pointer-events-auto w-8 h-8 flex items-center justify-center rounded-xl transition-all shrink-0 ${res.liked ? 'bg-pink-50 text-pink-500' : 'text-slate-300 hover:bg-slate-50'}`}><Lucide name="heart" size={18} fill={res.liked ? "currentColor" : "none"} /></button>
+                        <button onClick={e => { e.stopPropagation(); onToggleLike(res.id); }} className={`pointer-events-auto w-8 h-8 flex items-center justify-center rounded-full transition-all shrink-0 ${res.liked ? 'bg-pink-50 text-pink-500' : 'text-slate-300 hover:bg-slate-50'}`}><Lucide name="heart" size={18} fill={res.liked ? "currentColor" : "none"} /></button>
                     </div>
                     <p className="font-bold text-slate-800 italic text-sm leading-relaxed break-words line-clamp-3 pointer-events-none">"{res.answer}"</p>
                 </div>
