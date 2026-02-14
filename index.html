@@ -184,7 +184,7 @@
             return (
                 <div className="fixed inset-0 z-[5000] flex items-center justify-center p-6 animate-in fade-in duration-200">
                     <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onCancel} />
-                    <div className="relative bg-white w-full max-w-[320px] rounded-3xl p-8 shadow-2xl space-y-6 animate-pop-in duration-200">
+                    <div className="relative bg-white w-full max-w-[320px] rounded-3xl p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
                         <div className="flex flex-col items-center text-center space-y-3">
                             <div className={`p-3 rounded-2xl ${isDanger ? 'bg-pink-50 text-pink-500' : 'bg-indigo-50 text-indigo-500'}`}>
                                 <Lucide name="alert-circle" size={24} />
@@ -385,7 +385,7 @@
 
                     {notification && (
                         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[3000] animate-in fade-in slide-in-from-top-2">
-                            <div className="bg-slate-900/95 backdrop-blur-md text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-xl flex items-center gap-2 border border-white/10 animate-pop-in">
+                            <div className="bg-slate-900/95 backdrop-blur-md text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-xl flex items-center gap-2 border border-white/10">
                                 <Lucide name="check-circle-2" size={14} className="text-emerald-400" />
                                 {notification}
                             </div>
@@ -404,7 +404,7 @@
                     />
 
                     {['home', 'stats', 'favorites'].includes(view) && (
-                        <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-auto bg-white/95 border border-slate-300 shadow-[0_15px_40px_rgba(0,0,0,0.08)] rounded-full flex items-center p-2 z-[100] animate-slide-up">
+                        <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-auto bg-white/95 border border-slate-300 shadow-[0_15px_40px_rgba(0,0,0,0.08)] rounded-full flex items-center p-2 z-[100]">
                             <button onClick={() => navigate('home')} className={`icon-btn-circle transition-all ${view === 'home' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400'}`}>
                                 <Lucide name="layout" size={20} />
                             </button>
@@ -427,14 +427,14 @@
         function LoginView({ onLoginGoogle }) {
             return (
                 <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-10 animate-in fade-in duration-700">
-                    <div className="text-center space-y-4 animate-slide-up">
+                    <div className="text-center space-y-4">
                         <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-tr from-indigo-500 to-purple-400 flex items-center justify-center text-white shadow-2xl mx-auto mb-6 animate-pulse-slow">
                             <Lucide name="sparkles" size={40} />
                         </div>
                         <h1 className="text-4xl font-black tracking-tighter text-slate-900">coelog</h1>
                     </div>
                     
-                    <div className="w-full max-w-xs space-y-4 animate-slide-up delay-100">
+                    <div className="w-full max-w-xs space-y-4">
                         <button onClick={onLoginGoogle} className="google-btn w-full justify-center py-4 text-base active:scale-95 transition-all">
                             <Lucide name="mail" size={20} />
                             Googleで始める
@@ -458,9 +458,9 @@
                     </header>
                     <div className="grid gap-4 pb-24">
                         {surveys.length === 0 ? (
-                            <button onClick={() => onNavigate('create')} className="w-full bg-white border-2 border-dashed border-slate-300 rounded-card py-12 text-center space-y-3 animate-pop-in"><Lucide name="plus" size={24} className="mx-auto text-indigo-200" /><p className="text-slate-500 text-xs font-bold">アンケートを作成</p></button>
-                        ) : surveys.map((s, i) => (
-                            <button key={s.id} onClick={() => onNavigate('stats', s)} className="bg-white border-visible p-5 rounded-card text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98] animate-slide-up opacity-0" style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'forwards' }}>
+                            <button onClick={() => onNavigate('create')} className="w-full bg-white border-2 border-dashed border-slate-300 rounded-card py-12 text-center space-y-3"><Lucide name="plus" size={24} className="mx-auto text-indigo-200" /><p className="text-slate-500 text-xs font-bold">アンケートを作成</p></button>
+                        ) : surveys.map(s => (
+                            <button key={s.id} onClick={() => onNavigate('stats', s)} className="bg-white border-visible p-5 rounded-card text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center text-slate-400 font-black text-[9px]"><div className="p-1.5 bg-indigo-50 text-indigo-500 rounded-xl"><Lucide name="message-circle" size={14} /></div><span className="flex items-center gap-1"><Lucide name="clock" size={10} /> {formatDateTime(s.createdAt)}</span></div>
                                     <div><h3 className="font-bold text-lg text-slate-800 leading-tight">{s.title}</h3><p className="text-xs text-slate-400 line-clamp-1 italic mt-1">"{s.question}"</p></div>
@@ -572,7 +572,9 @@
             return (
                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-400 pb-24">
                     <header className="flex items-center justify-between py-1"><button onClick={onBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="icon-btn-circle text-indigo-600 bg-white shadow-sm border-visible border-indigo-200 active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
-                    <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden animate-pop-in`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button><button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
+                    <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden animate-pop-in`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button>
+                    {/* 修正：プレビュー用フラグを渡す */}
+                    <button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
                     <section className="space-y-4"><div className="flex justify-between items-center px-2 text-[10px] font-black text-slate-500 uppercase tracking-widest"><h3>最近の回答</h3><button onClick={() => setShowDeleteConfirm(true)} className="text-pink-500 flex items-center gap-1"><Lucide name="trash-2" size={11} /> 削除</button></div>
                         <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => (
                             <ResponseItem 
@@ -634,7 +636,8 @@
 
                         <div className="overflow-y-auto p-6 flex flex-col items-center custom-scrollbar w-full">
                             <div className="text-center w-full mb-8">
-                                <p className="text-xl font-black text-white leading-snug italic drop-shadow-md">"{survey.question}"</p>
+                                {/* 引用符削除済み */}
+                                <p className="text-xl font-black text-white leading-snug italic drop-shadow-md">{survey.question}</p>
                             </div>
 
                             <div className="w-full relative mb-6">
@@ -678,7 +681,8 @@
             return (
                 <div className={`fixed inset-0 z-[100] ${theme.class} flex flex-col h-full w-full animate-in fade-in duration-300`}>
                     <div className="absolute top-0 left-0 w-full p-4 pt-safe z-20 flex justify-end items-center pointer-events-none">
-                        <button onClick={onClose} className="pointer-events-auto w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-md active:scale-95 transition-all shadow-sm"><Lucide name="x" size={18} /></button>
+                        {/* 修正: バツボタンのデザインをミニマル化 */}
+                        <button onClick={onClose} className="pointer-events-auto w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/80 transition-colors"><Lucide name="x" size={24} /></button>
                     </div>
                     <div className="flex-1 flex flex-col items-center justify-center p-6 min-h-0 relative">
                         <div className="absolute -top-20 -left-20 w-[300px] h-[300px] bg-white/20 rounded-full blur-[80px]" /><div className="absolute bottom-0 right-0 w-[200px] h-[200px] bg-white/10 rounded-full blur-[60px]" />
@@ -689,7 +693,8 @@
                                     <h1 className="text-white text-xl font-black leading-tight drop-shadow-md mb-2">{activeSurvey?.title || "お気に入り"}</h1>
                                 </div>
                                 <div className="flex-1 flex flex-col justify-center items-center p-6 overflow-hidden relative">
-                                    <div className="w-full border-b border-white/20 pb-4 mb-6">{activeSurvey && <div className="text-white/90 text-sm font-bold leading-relaxed text-center">"{activeSurvey.question}"</div>}</div>
+                                    {/* 修正: 引用符削除 */}
+                                    <div className="w-full border-b border-white/20 pb-4 mb-6">{activeSurvey && <div className="text-white/90 text-sm font-bold leading-relaxed text-center">{activeSurvey.question}</div>}</div>
                                     <div className={`w-full text-center text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`}>"{response.answer}"</div>
                                     {!response.allowSns && <div className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-pink-500/50 rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shadow-lg"><Lucide name="lock" size={10} /> SNS不可</div>}
                                 </div>
