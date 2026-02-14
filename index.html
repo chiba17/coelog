@@ -377,7 +377,11 @@
 
             const navigate = (v, d = null, i = 0, isPreview = false) => {
                 setIsPreviewMode(isPreview);
-                if(d) setCurrentSurvey(d);
+                if (d) {
+                    setCurrentSurvey(d);
+                } else if (v === 'share') {
+                    setCurrentSurvey(null);
+                }
                 if(v === 'share') setSelectedResponseIndex(i);
                 setView(v);
                 window.scrollTo(0,0);
