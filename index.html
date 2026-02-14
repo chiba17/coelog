@@ -98,6 +98,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
         
         .no-callout { -webkit-touch-callout: none; }
+        .allow-select { user-select: text; -webkit-user-select: text; }
     </style>
 </head>
 <body class="antialiased">
@@ -128,14 +129,12 @@
         const MAX_ANSWER_LENGTH = 140;
         // --- 修正: グラデーション定義の更新 ---
         const GRADIENTS = [
-            { id: 'purple', name: 'パープル', class: 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500' },
-            { id: 'sunset', name: 'サンセット', class: 'bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600' },
-            { id: 'ocean', name: 'オーシャン', class: 'bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600' },
-            { id: 'nature', name: 'ネイチャー', class: 'bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600' },
-            // モーニング: 白文字が見やすいよう濃いめに調整
-            { id: 'morning', name: 'モーニング', class: 'bg-gradient-to-br from-orange-500 via-rose-500 to-pink-600' },
-            // ミッドナイト: ダークすぎないワインレッド系に変更
-            { id: 'midnight', name: 'ワインレッド', class: 'bg-gradient-to-br from-rose-800 via-fuchsia-900 to-slate-900' },
+            { id: 'purple', name: '藤 - Fuji', class: 'bg-gradient-to-br from-indigo-400 via-purple-500 to-violet-600' },
+            { id: 'sunset', name: '茜 - Akane', class: 'bg-gradient-to-br from-rose-400 via-red-500 to-orange-600' },
+            { id: 'ocean', name: '浅葱 - Asagi', class: 'bg-gradient-to-br from-cyan-500 via-teal-600 to-blue-600' },
+            { id: 'nature', name: '常盤 - Tokiwa', class: 'bg-gradient-to-br from-emerald-500 via-green-600 to-teal-700' },
+            { id: 'midnight', name: '群青 - Gunjo', class: 'bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700' },
+            { id: 'morning', name: '琥珀 - Kohaku', class: 'bg-gradient-to-br from-amber-500 via-orange-600 to-red-700' },
         ];
 
         const formatDateTime = (ts) => {
