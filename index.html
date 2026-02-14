@@ -34,7 +34,7 @@
         .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
 
-        /* スムースで可愛いアニメーション */
+        /* スムースで可愛いアニメーション (復旧) */
         @keyframes popIn {
             0% { transform: scale(0.5); opacity: 0; }
             60% { transform: scale(1.1); opacity: 1; }
@@ -47,13 +47,6 @@
             to { transform: translateY(0); opacity: 1; }
         }
         .animate-slide-up { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-        /* 【追加】位置移動のない単純なフェードイン（リスト用） */
-        @keyframes simpleFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .animate-simple-fade-in { animation: simpleFadeIn 0.3s ease-out forwards; }
         
         @keyframes float {
             0%, 100% { transform: translateY(0); }
@@ -140,8 +133,6 @@
             { id: 'ocean', name: 'オーシャン', class: 'bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600' },
             { id: 'nature', name: 'ネイチャー', class: 'bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600' },
             { id: 'midnight', name: 'ミッドナイト', class: 'bg-gradient-to-br from-indigo-900 via-slate-800 to-gray-900' },
-            /* 【変更】新しいグラデーション追加 */
-            { id: 'morning', name: 'モーニング', class: 'bg-gradient-to-br from-amber-200 via-orange-300 to-rose-400' },
         ];
 
         const formatDateTime = (ts) => {
@@ -304,7 +295,6 @@
                 textArea.style.position = "fixed";
                 textArea.style.left = "-9999px";
                 document.body.appendChild(textArea);
-                // 【変更】画面が動かないよう preventScroll を指定
                 textArea.focus({preventScroll: true});
                 textArea.select();
                 try {
@@ -323,7 +313,6 @@
                     const cleanData = {};
                     Object.keys(data).forEach(key => { if(data[key] !== undefined) cleanData[key] = data[key]; });
                     const ref = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys');
-                    
                     if (id) {
                         await ref.doc(id).update(cleanData);
                         showToast("更新しました");
@@ -586,7 +575,7 @@
                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-400 pb-24">
                     <header className="flex items-center justify-between py-1"><button onClick={onBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
                     <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden animate-simple-fade-in`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button>
-                    {/* プレビューボタンに true を渡す */}
+                    {/* 修正：プレビュー用フラグ(true)を確実に渡す */}
                     <button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
                     <section className="space-y-4"><div className="flex justify-between items-center px-2 text-[10px] font-black text-slate-500 uppercase tracking-widest"><h3>最近の回答</h3><button onClick={() => setShowDeleteConfirm(true)} className="text-pink-500 flex items-center gap-1"><Lucide name="trash-2" size={11} /> 削除</button></div>
                         <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => (
@@ -649,7 +638,7 @@
 
                         <div className="overflow-y-auto p-6 flex flex-col items-center custom-scrollbar w-full">
                             <div className="text-center w-full mb-8">
-                                <p className="text-xl font-black text-white leading-snug italic drop-shadow-md">{survey.question}</p>
+                                <p className="text-xl font-black text-white leading-snug italic drop-shadow-md">"{survey.question}"</p>
                             </div>
 
                             <div className="w-full relative mb-6">
