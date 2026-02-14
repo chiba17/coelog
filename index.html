@@ -34,20 +34,41 @@
         .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
 
-        /* シンプルで滑らかなアニメーション */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* スムースで可愛いアニメーション */
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
         }
-        .animate-fade-in-up { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-pop-in { animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+        @keyframes slideUpFade {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        /* 【追加】位置移動のない単純なフェードイン（リスト用） */
+        @keyframes simpleFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-simple-fade-in { animation: simpleFadeIn 0.3s ease-out forwards; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
         
         .delay-100 { animation-delay: 100ms; }
         .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
 
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         .pt-safe { padding-top: env(safe-area-inset-top); }
         
-        /* 固定サイズの正円ボタン（重要：display: flexとalign-itemsで崩れ防止） */
+        /* 固定サイズの正円ボタン */
         .icon-btn-circle {
             width: 44px !important;
             height: 44px !important;
@@ -119,6 +140,8 @@
             { id: 'ocean', name: 'オーシャン', class: 'bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600' },
             { id: 'nature', name: 'ネイチャー', class: 'bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600' },
             { id: 'midnight', name: 'ミッドナイト', class: 'bg-gradient-to-br from-indigo-900 via-slate-800 to-gray-900' },
+            /* 【変更】新しいグラデーション追加 */
+            { id: 'morning', name: 'モーニング', class: 'bg-gradient-to-br from-amber-200 via-orange-300 to-rose-400' },
         ];
 
         const formatDateTime = (ts) => {
@@ -281,6 +304,8 @@
                 textArea.style.position = "fixed";
                 textArea.style.left = "-9999px";
                 document.body.appendChild(textArea);
+                // 【変更】画面が動かないよう preventScroll を指定
+                textArea.focus({preventScroll: true});
                 textArea.select();
                 try {
                     document.execCommand('copy');
@@ -298,6 +323,7 @@
                     const cleanData = {};
                     Object.keys(data).forEach(key => { if(data[key] !== undefined) cleanData[key] = data[key]; });
                     const ref = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('surveys');
+                    
                     if (id) {
                         await ref.doc(id).update(cleanData);
                         showToast("更新しました");
@@ -367,7 +393,6 @@
                     {view === 'favorites' && <FavoritesView responses={favoriteResponses} surveys={surveys} onNavigate={navigate} onBack={() => setView('home')} onToggleLike={toggleLike} />}
                     {(view === 'create' || view === 'edit') && <SurveyFormView initialData={view === 'edit' ? currentSurvey : null} onSave={handleSaveSurvey} onBack={() => setView(view === 'edit' ? 'stats' : 'home')} />}
                     {view === 'respond' && <RespondView survey={currentSurvey} onSubmit={handleAddResponse} onBack={() => setView('stats')} isPreview={isPreviewMode} />}
-                    {/* 修正: navigate呼び出し時に第4引数（isPreview: true）を渡す */}
                     {view === 'stats' && <StatsView survey={currentSurvey} responses={currentResponses} onNavigate={(v, d, i, p) => navigate(v, d, i, p)} onBack={() => setView('home')} onDelete={handleDeleteSurvey} onDeleteResponse={handleDeleteResponse} onToggleLike={toggleLike} onCopy={handleCopyURL} />}
                     {view === 'share' && <ResponseGallery responses={currentSurvey ? currentResponses : favoriteResponses} initialIndex={selectedResponseIndex} survey={currentSurvey} surveys={surveys} onClose={() => setView(currentSurvey ? 'stats' : 'favorites')} />}
 
@@ -524,6 +549,7 @@
             );
         }
 
+        // --- リスト項目 (アニメーション修正：シンプルフェードイン) ---
         const ResponseItem = ({ res, survey, index, length, onNavigate, onToggleLike, setDeleteResId }) => {
             const longPressProps = useLongPress(() => setDeleteResId(res.id), 800);
             return (
@@ -531,7 +557,7 @@
                     onClick={() => onNavigate('share', survey, index)}
                     {...longPressProps}
                     onContextMenu={(e) => { e.preventDefault(); setDeleteResId(res.id); }}
-                    className={`bg-white border-visible p-5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] select-none no-callout animate-fade-in-up ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}
+                    className={`bg-white border-visible p-5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] select-none no-callout animate-simple-fade-in opacity-0 ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}
                     style={{ animationDelay: `${index * 50}ms` }}
                 >
                     <div className="flex items-start justify-between pointer-events-none">
@@ -552,14 +578,15 @@
         function StatsView({ survey, responses, onNavigate, onBack, onDelete, onDeleteResponse, onToggleLike, onCopy }) {
             const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
             const [deleteResId, setDeleteResId] = useState(null);
+            
             const bindLongPress = (id) => useLongPress(() => setDeleteResId(id), 800);
             const theme = GRADIENTS.find(g => g.id === survey?.gradientId) || GRADIENTS[0];
             
             return (
                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-400 pb-24">
                     <header className="flex items-center justify-between py-1"><button onClick={onBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button><h2 className="font-black text-slate-900 line-clamp-1 text-sm text-center flex-1 px-4">{survey.title}</h2><button onClick={() => onNavigate('edit', survey)} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="edit-3" size={18} /></button></header>
-                    <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden animate-fade-in-up`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button>
-                    {/* 修正：プレビュー用フラグ(true)を確実に渡す */}
+                    <div className={`${theme.class} rounded-3xl py-6 px-8 text-white shadow-xl relative text-center space-y-4 overflow-hidden animate-simple-fade-in`}><div className="space-y-0.5"><span className="text-white/80 text-[10px] font-black uppercase tracking-widest">回答数</span><div className="text-6xl font-black tracking-tighter tabular-nums">{responses.length}</div></div><div className="grid grid-cols-2 gap-2.5 pt-1"><button onClick={onCopy} className="flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 py-2.5 rounded-xl text-[11px] font-black active:scale-95 transition-all"><Lucide name="copy" size={14} /> URLコピー</button>
+                    {/* プレビューボタンに true を渡す */}
                     <button onClick={() => onNavigate('respond', survey, 0, true)} className="flex items-center justify-center gap-1.5 bg-white text-indigo-600 py-2.5 rounded-xl text-[11px] font-black shadow-lg active:scale-95 transition-all"><Lucide name="eye" size={14} /> プレビュー</button></div></div>
                     <section className="space-y-4"><div className="flex justify-between items-center px-2 text-[10px] font-black text-slate-500 uppercase tracking-widest"><h3>最近の回答</h3><button onClick={() => setShowDeleteConfirm(true)} className="text-pink-500 flex items-center gap-1"><Lucide name="trash-2" size={11} /> 削除</button></div>
                         <div className="grid gap-3">{responses.length === 0 ? <div className="bg-white border-visible border-dashed rounded-card py-12 text-center italic text-xs text-slate-400">まだ回答はありません</div> : responses.map((res, i) => (
@@ -600,13 +627,13 @@
 
             if (submitted) return (
                 <div className={`fixed inset-0 z-50 ${theme.class} flex flex-col items-center justify-center p-6 animate-in zoom-in-95 duration-500`}>
-                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-10 shadow-2xl w-full max-w-sm text-center animate-fade-in-up">
-                        <div className="w-20 h-20 bg-white text-indigo-500 rounded-full flex items-center justify-center shadow-lg mb-6 mx-auto"><Lucide name="check" size={36} strokeWidth={4} /></div>
-                        <h2 className="text-2xl font-black text-white tracking-tight mb-2 drop-shadow-md">Thank You!</h2>
-                        <p className="text-white/80 text-sm font-bold leading-relaxed mb-10">回答ありがとうございました。</p>
+                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-10 shadow-2xl w-full max-w-sm text-center animate-pop-in">
+                        <div className="w-20 h-20 bg-white text-indigo-500 rounded-full flex items-center justify-center shadow-lg mb-6 mx-auto animate-float"><Lucide name="check" size={36} strokeWidth={4} /></div>
+                        <h2 className="text-2xl font-black text-white tracking-tight mb-2 drop-shadow-md animate-slide-up delay-100">Thank You!</h2>
+                        <p className="text-white/80 text-sm font-bold leading-relaxed mb-10 animate-slide-up delay-200">回答ありがとうございました。</p>
                         {isPreview ? 
-                            <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all hover:shadow-2xl">回答一覧に戻る</button> : 
-                            <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95">画面を閉じる</button>
+                            <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all hover:shadow-2xl animate-slide-up delay-300">回答一覧に戻る</button> : 
+                            <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95 animate-slide-up delay-300">画面を閉じる</button>
                         }
                     </div>
                 </div>
@@ -622,7 +649,6 @@
 
                         <div className="overflow-y-auto p-6 flex flex-col items-center custom-scrollbar w-full">
                             <div className="text-center w-full mb-8">
-                                {/* 引用符削除済み */}
                                 <p className="text-xl font-black text-white leading-snug italic drop-shadow-md">{survey.question}</p>
                             </div>
 
