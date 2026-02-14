@@ -570,7 +570,7 @@
                     onClick={() => onNavigate('share', survey, index)}
                     {...longPressProps}
                     onContextMenu={(e) => { e.preventDefault(); setDeleteResId(res.id); }}
-                    className={`bg-white border-visible p-5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] select-none no-callout animate-simple-fade-in opacity-0 ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}
+                    className={`bg-white border-visible p-4 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] select-none no-callout animate-simple-fade-in opacity-0 ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}
                     style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'forwards' }}
                 >
                     <div className="flex items-start justify-between pointer-events-none">
