@@ -34,12 +34,13 @@
         .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
 
-        /* 修正: バウンスを排除し、滑らかで上品な出現アニメーションに変更 */
-        @keyframes gentleScale {
-            0% { transform: scale(0.95); opacity: 0; }
+        /* スムースで可愛いアニメーション (復旧) */
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .animate-gentle-scale { animation: gentleScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-pop-in { animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
 
         @keyframes slideUpFade {
             from { transform: translateY(20px); opacity: 0; }
@@ -54,11 +55,25 @@
         }
         .animate-simple-fade-in { animation: simpleFadeIn 0.3s ease-out forwards; }
         
+        /* 【追加】ギャラリー表示用のこだわりのアニメーション */
+        @keyframes zoomInUp {
+            0% { opacity: 0; transform: scale(0.92) translateY(15px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-zoom-in-up { animation: zoomInUp 0.45s cubic-bezier(0.2, 0.9, 0.2, 1) forwards; will-change: transform, opacity; }
+
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-6px); }
         }
         .animate-float { animation: float 3s ease-in-out infinite; }
+
+        /* 修正: バウンスを排除し、滑らかで上品な出現アニメーションに変更 */
+        @keyframes gentleScale {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-gentle-scale { animation: gentleScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
         .delay-100 { animation-delay: 100ms; }
         .delay-200 { animation-delay: 200ms; }
@@ -533,10 +548,15 @@
                         <button onClick={handleBack} className="icon-btn-circle text-slate-500 bg-white shadow-sm border-visible active:scale-90 transition-all"><Lucide name="arrow-left" size={18} /></button>
                         <h2 className="font-black text-sm text-slate-900">{isEdit ? '内容を編集' : '新しく作る'}</h2><div className="w-11 h-11 shrink-0" />
                     </header>
-                    <div className="bg-white border-visible rounded-card p-6 shadow-sm space-y-6">
+                    {/* ここを変更: 枠線削除、影を柔らかく、余白調整 */}
+                    <div className="bg-white rounded-card p-5 shadow-xl space-y-4">
                         <div className="space-y-2"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">アンケート名</label><input type="text" placeholder="例：次回のテーマについて" className="w-full bg-transparent border-b-2 border-slate-200 focus:border-indigo-400 outline-none py-1.5 text-xl font-bold transition-all placeholder:text-slate-300" value={title} onChange={e => setTitle(e.target.value)} /></div>
                         <div className="space-y-2"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">質問の内容</label><textarea placeholder="聞きたいことをひとつだけ" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold focus:bg-white focus:border-indigo-400 outline-none transition-all resize-none h-32" value={question} onChange={e => setQuestion(e.target.value)} /></div>
-                        <div className="space-y-3 pt-1"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">デザイン</label><div className="flex flex-wrap gap-3 px-1">{GRADIENTS.map(g => (<button key={g.id} onClick={() => setGradientId(g.id)} className={`w-9 h-9 rounded-full transition-all relative ${g.class} ${gradientId === g.id ? 'scale-110 ring-4 ring-indigo-50 shadow-md' : 'opacity-60'}`}>{gradientId === g.id && <Lucide name="check" size={14} className="text-white mx-auto drop-shadow-md" />}</button>))}</div></div>
+                        <div className="space-y-3 pt-1"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">デザイン</label><div className="flex flex-wrap gap-3 px-1">{GRADIENTS.map(g => (
+                            <button key={g.id} onClick={() => setGradientId(g.id)} className={`w-9 h-9 rounded-full transition-all relative ${g.class} ${gradientId === g.id ? 'scale-110 ring-4 ring-indigo-50 shadow-md' : 'hover:scale-105'}`}>
+                                {gradientId === g.id && <Lucide name="check" size={14} className="text-white mx-auto drop-shadow-md" />}
+                            </button>
+                        ))}</div></div>
                     </div>
                     <div className="flex flex-col items-center gap-4 pt-4">
                         <button onClick={() => onSave({ id: initialData?.id, title, question, gradientId })} disabled={!title || !question} className={`px-12 py-4 h-14 rounded-full font-black text-lg text-white shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all ${!title || !question ? 'bg-slate-300 shadow-none' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 border border-indigo-400'}`}>{isEdit ? '保存する' : '公開する'} <Lucide name="send" size={20} /></button>
@@ -626,11 +646,11 @@
                 <div className={`fixed inset-0 z-50 ${theme.class} flex flex-col items-center justify-center p-6 animate-in zoom-in-95 duration-500`}>
                     <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-10 shadow-2xl w-full max-w-sm text-center animate-gentle-scale">
                         <div className="w-20 h-20 bg-white text-indigo-500 rounded-full flex items-center justify-center shadow-lg mb-6 mx-auto animate-float"><Lucide name="check" size={36} strokeWidth={4} /></div>
-                        <h2 className="text-2xl font-black text-white tracking-tight mb-2 drop-shadow-md">Thank You!</h2>
-                        <p className="text-white/80 text-sm font-bold leading-relaxed mb-10">回答ありがとうございました。</p>
+                        <h2 className="text-2xl font-black text-white tracking-tight mb-2 drop-shadow-md animate-slide-up delay-100">Thank You!</h2>
+                        <p className="text-white/80 text-sm font-bold leading-relaxed mb-10 animate-slide-up delay-200">回答ありがとうございました。</p>
                         {isPreview ? 
-                            <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all hover:shadow-2xl">回答一覧に戻る</button> : 
-                            <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95">画面を閉じる</button>
+                            <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all hover:shadow-2xl animate-slide-up delay-300">回答一覧に戻る</button> : 
+                            <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95 animate-slide-up delay-300">画面を閉じる</button>
                         }
                     </div>
                 </div>
