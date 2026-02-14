@@ -34,19 +34,24 @@
         .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
 
-        /* スムースで可愛いアニメーション (復旧) */
-        @keyframes popIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            60% { transform: scale(1.1); opacity: 1; }
+        /* 修正: バウンスを排除し、滑らかで上品な出現アニメーションに変更 */
+        @keyframes gentleScale {
+            0% { transform: scale(0.95); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .animate-pop-in { animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .animate-gentle-scale { animation: gentleScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
         @keyframes slideUpFade {
             from { transform: translateY(20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
         .animate-slide-up { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes simpleFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-simple-fade-in { animation: simpleFadeIn 0.3s ease-out forwards; }
         
         @keyframes float {
             0%, 100% { transform: translateY(0); }
@@ -382,6 +387,7 @@
                     {view === 'favorites' && <FavoritesView responses={favoriteResponses} surveys={surveys} onNavigate={navigate} onBack={() => setView('home')} onToggleLike={toggleLike} />}
                     {(view === 'create' || view === 'edit') && <SurveyFormView initialData={view === 'edit' ? currentSurvey : null} onSave={handleSaveSurvey} onBack={() => setView(view === 'edit' ? 'stats' : 'home')} />}
                     {view === 'respond' && <RespondView survey={currentSurvey} onSubmit={handleAddResponse} onBack={() => setView('stats')} isPreview={isPreviewMode} />}
+                    {/* ここで確実に isPreview 引数を渡しています */}
                     {view === 'stats' && <StatsView survey={currentSurvey} responses={currentResponses} onNavigate={(v, d, i, p) => navigate(v, d, i, p)} onBack={() => setView('home')} onDelete={handleDeleteSurvey} onDeleteResponse={handleDeleteResponse} onToggleLike={toggleLike} onCopy={handleCopyURL} />}
                     {view === 'share' && <ResponseGallery responses={currentSurvey ? currentResponses : favoriteResponses} initialIndex={selectedResponseIndex} survey={currentSurvey} surveys={surveys} onClose={() => setView(currentSurvey ? 'stats' : 'favorites')} />}
 
@@ -482,7 +488,7 @@
                         {responses.length === 0 ? <div className="bg-white/40 border-2 border-dashed border-slate-300 rounded-card py-16 text-center text-slate-300 text-xs font-bold italic">まだありません</div> : responses.map((res, i) => {
                             const s = surveys.find(sur => sur.id === res.surveyId);
                             return (
-                                <div key={res.id} onClick={() => onNavigate('share', null, i)} className="bg-white border-visible p-5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] select-none no-callout animate-fade-in-up" style={{ animationDelay: `${i * 100}ms` }}>
+                                <div key={res.id} onClick={() => onNavigate('share', null, i)} className="bg-white border-visible p-5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] select-none no-callout animate-simple-fade-in opacity-0" style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'forwards' }}>
                                     <div className="flex items-center justify-between">
                                         <div className="flex flex-col gap-1 w-full pr-2">
                                             <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{s?.title || "テーマ不明"}</span>
@@ -538,7 +544,6 @@
             );
         }
 
-        // --- リスト項目 (アニメーション修正：シンプルフェードイン) ---
         const ResponseItem = ({ res, survey, index, length, onNavigate, onToggleLike, setDeleteResId }) => {
             const longPressProps = useLongPress(() => setDeleteResId(res.id), 800);
             return (
@@ -547,7 +552,7 @@
                     {...longPressProps}
                     onContextMenu={(e) => { e.preventDefault(); setDeleteResId(res.id); }}
                     className={`bg-white border-visible p-5 rounded-card flex flex-col gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] select-none no-callout animate-simple-fade-in opacity-0 ${res.allowSns ? 'border-slate-300' : 'border-pink-200'}`}
-                    style={{ animationDelay: `${index * 50}ms` }}
+                    style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'forwards' }}
                 >
                     <div className="flex items-start justify-between pointer-events-none">
                         <div className="flex flex-col gap-1.5 w-full pr-2">
@@ -614,15 +619,16 @@
 
             const theme = GRADIENTS.find(g => g.id === survey?.gradientId) || GRADIENTS[0];
 
+            // 修正：アニメーションを gentleScale に変更
             if (submitted) return (
                 <div className={`fixed inset-0 z-50 ${theme.class} flex flex-col items-center justify-center p-6 animate-in zoom-in-95 duration-500`}>
-                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-10 shadow-2xl w-full max-w-sm text-center animate-pop-in">
-                        <div className="w-20 h-20 bg-white text-indigo-500 rounded-full flex items-center justify-center shadow-lg mb-6 mx-auto animate-float"><Lucide name="check" size={36} strokeWidth={4} /></div>
-                        <h2 className="text-2xl font-black text-white tracking-tight mb-2 drop-shadow-md animate-slide-up delay-100">Thank You!</h2>
-                        <p className="text-white/80 text-sm font-bold leading-relaxed mb-10 animate-slide-up delay-200">回答ありがとうございました。</p>
+                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-10 shadow-2xl w-full max-w-sm text-center animate-gentle-scale">
+                        <div className="w-20 h-20 bg-white text-indigo-500 rounded-full flex items-center justify-center shadow-lg mb-6 mx-auto"><Lucide name="check" size={36} strokeWidth={4} /></div>
+                        <h2 className="text-2xl font-black text-white tracking-tight mb-2 drop-shadow-md">Thank You!</h2>
+                        <p className="text-white/80 text-sm font-bold leading-relaxed mb-10">回答ありがとうございました。</p>
                         {isPreview ? 
-                            <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all hover:shadow-2xl animate-slide-up delay-300">回答一覧に戻る</button> : 
-                            <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95 animate-slide-up delay-300">画面を閉じる</button>
+                            <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all hover:shadow-2xl">回答一覧に戻る</button> : 
+                            <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95">画面を閉じる</button>
                         }
                     </div>
                 </div>
@@ -638,7 +644,8 @@
 
                         <div className="overflow-y-auto p-6 flex flex-col items-center custom-scrollbar w-full">
                             <div className="text-center w-full mb-8">
-                                <p className="text-xl font-black text-white leading-snug italic drop-shadow-md">"{survey.question}"</p>
+                                {/* 引用符削除済み */}
+                                <p className="text-xl font-black text-white leading-snug italic drop-shadow-md">{survey.question}</p>
                             </div>
 
                             <div className="w-full relative mb-6">
@@ -682,6 +689,7 @@
             return (
                 <div className={`fixed inset-0 z-[100] ${theme.class} flex flex-col h-full w-full animate-in fade-in duration-300`}>
                     <div className="absolute top-0 left-0 w-full p-4 pt-safe z-20 flex justify-end items-center pointer-events-none">
+                        {/* 修正: 閉じるボタンのデザイン変更（背景なし、枠なし、影なし） */}
                         <button onClick={onClose} className="pointer-events-auto w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/80 transition-colors"><Lucide name="x" size={24} /></button>
                     </div>
                     <div className="flex-1 flex flex-col items-center justify-center p-6 min-h-0 relative">
@@ -693,6 +701,7 @@
                                     <h1 className="text-white text-xl font-black leading-tight drop-shadow-md mb-2">{activeSurvey?.title || "お気に入り"}</h1>
                                 </div>
                                 <div className="flex-1 flex flex-col justify-center items-center p-6 overflow-hidden relative">
+                                    {/* 修正: 引用符削除 */}
                                     <div className="w-full border-b border-white/20 pb-4 mb-6">{activeSurvey && <div className="text-white/90 text-sm font-bold leading-relaxed text-center">{activeSurvey.question}</div>}</div>
                                     <div className={`w-full text-center text-white font-bold italic drop-shadow-md break-words ${getFontSize(response.answer)}`}>"{response.answer}"</div>
                                     {!response.allowSns && <div className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-pink-500/50 rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest shadow-lg"><Lucide name="lock" size={10} /> SNS不可</div>}
