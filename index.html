@@ -134,13 +134,15 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'coelog-718ad';
 
         const MAX_ANSWER_LENGTH = 140;
+        // --- 修正: グラデーション定義の更新 (指定された色調整と追加) ---
         const GRADIENTS = [
-            { id: 'purple', name: '藤 - Fuji', class: 'bg-gradient-to-br from-indigo-400 via-purple-400 to-fuchsia-400 text-white' },
-            { id: 'sunset', name: '茜 - Akane', class: 'bg-gradient-to-br from-rose-400 via-red-400 to-orange-400 text-white' },
-            { id: 'ocean', name: '浅葱 - Asagi', class: 'bg-gradient-to-br from-cyan-400 via-sky-500 to-blue-500 text-white' },
-            { id: 'nature', name: '常盤 - Tokiwa', class: 'bg-gradient-to-br from-emerald-500 via-green-600 to-teal-700 text-white' },
+            { id: 'purple', name: '藤 - Fuji', class: 'bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 text-white' },
+            { id: 'sunset', name: '茜 - Akane', class: 'bg-gradient-to-br from-rose-500 via-red-500 to-orange-500 text-white' },
+            { id: 'ocean', name: '浅葱 - Asagi', class: 'bg-gradient-to-br from-sky-400 via-blue-400 to-indigo-500 text-white' },
+            { id: 'nature', name: '常盤 - Tokiwa', class: 'bg-gradient-to-br from-teal-400 via-emerald-500 to-green-600 text-white' },
             { id: 'midnight', name: '群青 - Gunjo', class: 'bg-gradient-to-br from-indigo-500 via-violet-600 to-purple-700 text-white' },
             { id: 'morning', name: '琥珀 - Kohaku', class: 'bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 text-white' },
+            { id: 'coral', name: '珊瑚 - Coral', class: 'bg-gradient-to-br from-rose-400 via-pink-400 to-red-400 text-white' },
         ];
 
         const formatDateTime = (ts) => {
