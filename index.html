@@ -129,6 +129,7 @@
         if (!firebase.apps.length) firebase.initializeApp(config);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        db.settings({ experimentalForceLongPolling: true });
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'coelog-718ad';
 
         const MAX_ANSWER_LENGTH = 140;
@@ -163,7 +164,7 @@
                     if (fill !== "none") icon.setAttribute('fill', fill);
                     icon.setAttribute('stroke-width', strokeWidth);
                     iconRef.current.appendChild(icon);
-                    lucide.createIcons();
+                    lucide.createIcons({ root: iconRef.current });
                 }
             }, [name, size, fill, strokeWidth]);
             return <span ref={iconRef} className={`inline-flex items-center justify-center shrink-0 aspect-square ${className}`}></span>;
