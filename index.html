@@ -34,12 +34,12 @@
         .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
 
-        /* スムースで可愛いアニメーション (修正: ガタつきを排除し滑らかに) */
-        @keyframes popIn {
-            0% { transform: scale(0.95); opacity: 0; }
+        /* 修正: バウンス（popIn）を削除し、下記の gentleScale を使用 */
+        @keyframes gentleScale {
+            0% { transform: scale(0.96); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .animate-pop-in { animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-gentle-scale { animation: gentleScale 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
 
         @keyframes slideUpFade {
             from { transform: translateY(20px); opacity: 0; }
@@ -47,12 +47,12 @@
         }
         .animate-slide-up { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        /* 【追加】位置移動のない単純なフェードイン（リスト用） */
+        /* 修正: チラつき防止のため、移動を伴わないフェードインを使用 */
         @keyframes simpleFadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        .animate-simple-fade-in { animation: simpleFadeIn 0.3s ease-out forwards; }
+        .animate-simple-fade-in { animation: simpleFadeIn 0.8s ease-out forwards; }
         
         /* 【追加】ギャラリー表示用のこだわりのアニメーション */
         @keyframes zoomInUp {
@@ -66,13 +66,6 @@
             50% { transform: translateY(-6px); }
         }
         .animate-float { animation: float 3s ease-in-out infinite; }
-
-        /* 修正: バウンスを排除し、滑らかで上品な出現アニメーションに変更 */
-        @keyframes gentleScale {
-            0% { transform: scale(0.95); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-gentle-scale { animation: gentleScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
         .delay-100 { animation-delay: 100ms; }
         .delay-200 { animation-delay: 200ms; }
@@ -147,7 +140,6 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'coelog-718ad';
 
         const MAX_ANSWER_LENGTH = 140;
-        // --- 修正: グラデーション定義の更新 (カラー調整) ---
         const GRADIENTS = [
             { id: 'purple', name: '藤 - Fuji', class: 'bg-gradient-to-br from-indigo-400 via-purple-400 to-fuchsia-400 text-white' },
             { id: 'sunset', name: '茜 - Akane', class: 'bg-gradient-to-br from-rose-400 via-red-400 to-orange-400 text-white' },
@@ -157,8 +149,8 @@
             { id: 'morning', name: '琥珀 - Kohaku', class: 'bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 text-white' },
             { id: 'coral', name: '珊瑚 - Coral', class: 'bg-gradient-to-br from-rose-400 via-pink-400 to-red-400 text-white' },
             { id: 'mist', name: '霞 - Kasumi', class: 'bg-gradient-to-br from-slate-400 via-gray-500 to-zinc-600 text-white' },
-            { id: 'mocha', name: 'モカ - Mocha', class: 'bg-gradient-to-br from-orange-900 via-amber-900 to-stone-800 text-white' }, // 変更: ブラウン系
-            { id: 'turquoise', name: '翡翠 - Hisui', class: 'bg-gradient-to-br from-teal-400 via-cyan-500 to-blue-500 text-white' }, // 変更: ターコイズ系
+            { id: 'lime', name: '若草 - Wakakusa', class: 'bg-gradient-to-br from-lime-400 via-green-500 to-emerald-600 text-white' },
+            { id: 'lapis', name: '瑠璃 - Ruri', class: 'bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 text-white' },
         ];
 
         const formatDateTime = (ts) => {
@@ -551,25 +543,21 @@
                         <h2 className="font-black text-sm text-slate-900">{isEdit ? '内容を編集' : '新しく作る'}</h2><div className="w-11 h-11 shrink-0" />
                     </header>
                     {/* 修正：枠線をborder-slate-200（うっすら）に変更、影の調整 */}
-                    <div className="bg-white border border-slate-200 rounded-[2.2rem] p-6 shadow-sm space-y-5">
-                        <div className="space-y-2"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">アンケート名</label><input type="text" placeholder="例：次回のテーマについて" className="w-full bg-transparent border-b-2 border-slate-200 focus:border-indigo-400 outline-none py-1.2 text-xl font-bold transition-all placeholder:text-slate-300" value={title} onChange={e => setTitle(e.target.value)} /></div>
+                    <div className="bg-white border border-slate-200 rounded-[2.2rem] p-6 shadow-sm space-y-6">
+                        <div className="space-y-2"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">アンケート名</label><input type="text" placeholder="例：次回のテーマについて" className="w-full bg-transparent border-b-2 border-slate-200 focus:border-indigo-400 outline-none py-1.5 text-xl font-bold transition-all placeholder:text-slate-300" value={title} onChange={e => setTitle(e.target.value)} /></div>
                         <div className="space-y-2"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">質問の内容</label><textarea placeholder="聞きたいことをひとつだけ" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold focus:bg-white focus:border-indigo-400 outline-none transition-all resize-none h-32" value={question} onChange={e => setQuestion(e.target.value)} /></div>
-                        <div className="space-y-3"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">デザイン</label><div className="flex flex-wrap gap-3 px-1">{GRADIENTS.map(g => (
+                        <div className="space-y-3 pt-1"><label className="text-[10px] font-black text-indigo-500 uppercase tracking-widest ml-1">デザイン</label><div className="flex flex-wrap gap-3 px-1">{GRADIENTS.map(g => (
                             <button key={g.id} onClick={() => setGradientId(g.id)} className={`w-9 h-9 rounded-full transition-all relative ${g.class} ${gradientId === g.id ? 'scale-110 ring-4 ring-indigo-50 shadow-md' : 'hover:scale-105'}`}>
                                 {gradientId === g.id && <Lucide name="check" size={14} className="text-white mx-auto drop-shadow-md" />}
                             </button>
                         ))}</div></div>
-                        
-                        {/* 修正：保存ボタンをカード内に移動 */}
-                        <div className="pt-2">
-                             <button onClick={() => onSave({ id: initialData?.id, title, question, gradientId })} disabled={!title || !question} className={`w-full py-5 rounded-[2rem] font-black text-lg text-white shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all ${!title || !question ? 'bg-slate-300 shadow-none' : 'bg-gradient-to-r from-indigo-500 to-purple-500 shadow-xl shadow-indigo-100'}`}>
-                                {isEdit ? '変更を保存する' : 'アンケートを公開'} <Lucide name="send" size={20} />
-                            </button>
-                        </div>
                     </div>
-                    
-                    {/* 修正：キャンセルボタン削除 */}
-                    
+                    {/* 修正：保存ボタンをカード内に移動（HTML構造上はコンテナ外だが、配置として調整） */}
+                    <div className="flex flex-col items-center gap-4 pt-4">
+                        <button onClick={() => onSave({ id: initialData?.id, title, question, gradientId })} disabled={!title || !question} className={`px-12 py-4 h-14 rounded-full font-black text-lg text-white shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all ${!title || !question ? 'bg-slate-300 shadow-none' : 'bg-gradient-to-r from-indigo-500 to-purple-500 shadow-xl shadow-indigo-100'}`}>
+                            {isEdit ? '変更を保存する' : 'アンケートを公開'} <Lucide name="send" size={20} />
+                        </button>
+                    </div>
                     <ConfirmModal isOpen={showConfirm} title="確認" message="入力した内容は保存されませんが、よろしいですか？" confirmText="破棄して戻る" cancelText="続ける" onConfirm={onBack} onCancel={() => setShowConfirm(false)} />
                 </div>
             );
@@ -652,13 +640,13 @@
 
             if (submitted) return (
                 <div className={`fixed inset-0 z-50 ${theme.class} flex flex-col items-center justify-center p-6 animate-in zoom-in-95 duration-500`}>
-                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-10 shadow-2xl w-full max-w-sm text-center animate-pop-in">
+                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-10 shadow-2xl w-full max-w-sm text-center animate-gentle-scale">
                         <div className="w-20 h-20 bg-white text-indigo-500 rounded-full flex items-center justify-center shadow-lg mb-6 mx-auto animate-float"><Lucide name="check" size={36} strokeWidth={4} /></div>
-                        <h2 className="text-2xl font-black text-white tracking-tight mb-2 drop-shadow-md animate-slide-up delay-100">Thank You!</h2>
-                        <p className="text-white/80 text-sm font-bold leading-relaxed mb-10 animate-slide-up delay-200">回答ありがとうございました。</p>
+                        <h2 className="text-2xl font-black text-white tracking-tight mb-2 drop-shadow-md animate-simple-fade-in delay-100" style={{animationFillMode:'both'}}>Thank You!</h2>
+                        <p className="text-white/80 text-sm font-bold leading-relaxed mb-10 animate-simple-fade-in delay-200" style={{animationFillMode:'both'}}>回答ありがとうございました。</p>
                         {isPreview ? 
-                            <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all hover:shadow-2xl animate-slide-up delay-300">回答一覧に戻る</button> : 
-                            <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95 animate-slide-up delay-300">画面を閉じる</button>
+                            <button onClick={onBack} className="w-full bg-white text-indigo-600 py-4 rounded-full font-black text-sm shadow-xl active:scale-95 transition-all hover:shadow-2xl animate-simple-fade-in delay-300" style={{animationFillMode:'both'}}>回答一覧に戻る</button> : 
+                            <button onClick={handleCloseWindow} className="w-full bg-white/20 text-white border border-white/40 py-4 rounded-full font-black text-sm hover:bg-white/30 transition-all active:scale-95 animate-simple-fade-in delay-300" style={{animationFillMode:'both'}}>画面を閉じる</button>
                         }
                     </div>
                 </div>
